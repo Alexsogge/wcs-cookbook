@@ -1,0 +1,16 @@
+table {
+  border-spacing: 5px;
+}
+
+table, tr, td {
+  border-bottom: 1px solid lightgray;
+  border-collapse: collapse;
+  padding: 5px;
+  padding-left: 20px;
+}
+
+.action_section{
+  margin-top: 50px;
+}
+
+

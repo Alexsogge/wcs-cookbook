@@ -1,0 +1,27 @@
+<h1>
+  Recipes
+</h1>
+
+
+<div fxLayout="column" fxLayoutGap="20px">
+  <div flex *ngFor="let recipe of recipes">
+    <mat-card class="recipe-card" routerLink = "/recipe/{{recipe.id}}">
+      <mat-card-header>
+        <div fxLayout="row" fxLayoutGap="40px">
+          <div fxFlex><img src="http://localhost:8000{{recipe.imageurl}}" alt="Recipe image" class="card-image"></div>
+          <div fxFlex>
+            <mat-card-title>{{recipe.name}}</mat-card-title>
+            <mat-card-subtitle>{{recipe.description}}</mat-card-subtitle>
+          </div>
+        </div>
+      </mat-card-header>
+      <mat-card-content>
+        <p>
+        </p>
+      </mat-card-content>
+    </mat-card>
+
+  </div>
+</div>
+
+

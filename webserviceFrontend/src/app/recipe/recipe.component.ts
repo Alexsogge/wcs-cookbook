@@ -1,0 +1,53 @@
+import { Component, OnInit } from '@angular/core';
+import {ActivatedRoute} from '@angular/router';
+
+import {CookSession, Ingredient, Recipe, Workstep} from '../recipe';
+import {ApiService} from '../api.service';
+
+@Component({
+  selector: 'app-recipe',
+  templateUrl: './recipe.component.html',
+  styleUrls: ['./recipe.component.css']
+})
+export class RecipeComponent implements OnInit {
+
+  columnsToDisplay = ['amount', 'name'];
+
+  private recipeId: number;
+  private recipe: Recipe = new Recipe();
+  private ingredients: Ingredient[] = [];
+  private worksteps: Workstep[] = [];
+
+  constructor(private route: ActivatedRoute, private apiService: ApiService) { }
+
+  ngOnInit() {
+    this.apiService.authenticate();
+    this.recipeId = +this.route.snapshot.paramMap.get('id');
+    this.apiService.getRecipe(this.recipeId).subscribe(recipe => this.initRecipe(recipe));
+  }
+
+  initRecipe(recipe: Recipe) {
+    this.recipe = recipe;
+    for (const id of recipe.ingredients) {
+      this.apiService.getIngedient(id).subscribe(ingredient => this.ingredients.push(ingredient));
+    }
+    this.apiService.getWorkstepsOfRecipe(recipe.id).subscribe(worksteps => this.worksteps = worksteps);
+    console.log(this.ingredients);
+  }
+
+  public startCooking() {
+    console.log("New session");
+    //this.apiService.authenticate();
+    this.apiService.askForNewCookSession(this.recipeId).subscribe(session => this.beginNewSession(session));
+  }
+
+  beginNewSession(session: CookSession) {
+    console.log(session.recipeName);
+  }
+
+  logedIn(token) {
+    console.log("Loged in");
+    console.log(token);
+  }
+
+}

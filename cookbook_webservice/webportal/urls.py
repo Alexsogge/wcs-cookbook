@@ -18,7 +18,6 @@ from django.urls import path, include
 import webportal.views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
     path('', webportal.views.home),
     path('home/', webportal.views.home)
 ]

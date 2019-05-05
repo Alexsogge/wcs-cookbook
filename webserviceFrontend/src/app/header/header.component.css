@@ -1,0 +1,9 @@
+mat-card {
+  background-color: rgb(225, 228, 232);
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+
+
+.mat-card-header { justify-content: center; }
+

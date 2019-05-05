@@ -1,0 +1,33 @@
+<div fxLayout="row">
+  <div fxFlex><img src="http://localhost:8000{{recipe.imageurl}}"></div>
+  <div fxFlex fxFlexOffset="20" class="action_section">
+    <button mat-raised-button color="primary" (click)="startCooking()">Start cooking</button>
+  </div>
+</div>
+
+
+<h1>{{recipe.name}}</h1>
+<h4>{{recipe.description}}</h4>
+
+<h3>Ingredients</h3>
+
+<table>
+  <tr *ngFor="let ingredient of ingredients">
+    <td>{{ingredient.amount}} {{ingredient.unit}}</td>
+    <td>{{ingredient.name}}</td>
+  </tr>
+</table>
+
+
+<h3>Preparation</h3>
+
+<mat-list>
+  <mat-list-item *ngFor="let workstep of worksteps; last as last">
+    {{workstep.description}}
+    <mat-divider [inset]="true" *ngIf="!last"></mat-divider>
+  </mat-list-item>
+</mat-list>
+
+
+
+
