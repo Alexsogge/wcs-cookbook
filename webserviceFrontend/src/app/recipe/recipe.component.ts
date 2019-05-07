@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 
 import {CookSession, Ingredient, Recipe, Workstep} from '../recipe';
 import {ApiService} from '../api.service';
@@ -18,10 +18,9 @@ export class RecipeComponent implements OnInit {
   private ingredients: Ingredient[] = [];
   private worksteps: Workstep[] = [];
 
-  constructor(private route: ActivatedRoute, private apiService: ApiService) { }
+  constructor(private route: ActivatedRoute, private apiService: ApiService, private router: Router) { }
 
   ngOnInit() {
-    this.apiService.authenticate();
     this.recipeId = +this.route.snapshot.paramMap.get('id');
     this.apiService.getRecipe(this.recipeId).subscribe(recipe => this.initRecipe(recipe));
   }
@@ -38,16 +37,14 @@ export class RecipeComponent implements OnInit {
   public startCooking() {
     console.log("New session");
     //this.apiService.authenticate();
-    this.apiService.askForNewCookSession(this.recipeId).subscribe(session => this.beginNewSession(session));
+    this.apiService.askForNewCookSession(this.recipeId).subscribe(session => this.beginNewSession(session[0]));
   }
 
   beginNewSession(session: CookSession) {
-    console.log(session.recipeName);
+    console.log(session);
+    this.router.navigateByUrl('/' + 'cooking' + '/' + session.id);
   }
 
-  logedIn(token) {
-    console.log("Loged in");
-    console.log(token);
-  }
+
 
 }

@@ -3,3 +3,5 @@ djangorestframework
 django-cors-headers
 Pillow
 django-rest-auth
+djangorestframework-jwt
+channels

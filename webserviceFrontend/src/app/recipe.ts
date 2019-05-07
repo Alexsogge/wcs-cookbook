@@ -37,3 +37,8 @@ export class CookSession {
   recipeName: string;
   currentStep: number;
 }
+
+export class Message {
+  id: string;
+  text: string;
+}

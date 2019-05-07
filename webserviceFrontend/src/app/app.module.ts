@@ -14,12 +14,21 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 import {MatToolbarModule} from '@angular/material/toolbar';
 import {MatInputModule} from '@angular/material/input';
 
+import { SocketIoModule, SocketIoConfig } from 'ngx-socket-io';
+
 
 import { NavigationComponent } from './navigation/navigation.component';
 import { HeaderComponent } from './header/header.component';
 import { HomeComponent } from './home/home.component';
 import { RecipeComponent } from './recipe/recipe.component';
 import { CookingComponent } from './cooking/cooking.component';
+import {UserService} from './user.service';
+import { LoginComponent } from './login/login.component';
+import { ProfileComponent } from './profile/profile.component';
+
+
+const config: SocketIoConfig = { url: 'ws://localhost:8000/ws/api/', options: {} };
+
 
 @NgModule({
   declarations: [
@@ -29,7 +38,9 @@ import { CookingComponent } from './cooking/cooking.component';
     HeaderComponent,
     HomeComponent,
     RecipeComponent,
-    CookingComponent
+    CookingComponent,
+    LoginComponent,
+    ProfileComponent,
   ],
   imports: [
     BrowserModule,
@@ -48,8 +59,10 @@ import { CookingComponent } from './cooking/cooking.component';
     MatInputModule,
     MatListModule,
     MatTableModule,
+    BrowserModule,
+    SocketIoModule.forRoot(config),
   ],
-  providers: [],
+  providers: [UserService],
   bootstrap: [AppComponent],
   exports: [
     MatButtonModule,

@@ -42,7 +42,7 @@ class Recipe(models.Model):
     image = models.ImageField(blank=True, null=True)
 
     def get_work_steps(self):
-        return self.work_steps.order_by('link_to_recipe')
+        return self.work_steps.order_by('recipeworkstep')
 
 
 class RecipeWorkStep(models.Model):

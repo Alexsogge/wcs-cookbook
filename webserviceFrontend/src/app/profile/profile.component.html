@@ -1,0 +1,5 @@
+<h1>User: {{userService.username}}</h1>
+
+<p *ngFor="let session of activeSessions">
+  <a routerLink="/cooking/{{session.id}}">{{session.recipeName}}</a>
+</p>

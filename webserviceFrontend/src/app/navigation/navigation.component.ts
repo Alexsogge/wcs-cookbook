@@ -1,4 +1,5 @@
 import {Component, EventEmitter, OnInit, Output} from '@angular/core';
+import {UserService} from "../user.service";
 
 @Component({
   selector: 'app-navigation',
@@ -9,7 +10,7 @@ export class NavigationComponent implements OnInit {
 
   @Output() public sidenavToggle = new EventEmitter();
 
-  constructor() { }
+  constructor(private userService: UserService) { }
 
   ngOnInit() {
   }

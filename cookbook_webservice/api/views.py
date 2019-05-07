@@ -1,6 +1,7 @@
+from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponseNotFound
 from django.shortcuts import render
-from rest_framework import viewsets
+from rest_framework import viewsets, permissions
 from api.serializers import *
 from webportal.models import *
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
@@ -50,12 +51,53 @@ def getIngredient(request, id):
     serial = IngredientSerializer(ingredient)
     return JsonResponse(serial.data)
 
-def startNewSession(request, recipe_id):
-    current_user = request.user
-    session = None
-    if CookingSession.objects.filter(owner=current_user, recipe__id=recipe_id).exists():
-        session = CookingSession.objects.get(owner=current_user, recipe__id=recipe_id)
-    else:
-        session = CookingSession.objects.create(owner=current_user, recipe=Recipe.objects.get(id=recipe_id))
-    return JsonResponse(SessionSerializer(session).data)
 
+# def startNewSession(request, recipe_id):
+#     current_user = request.user
+#     print(current_user)
+#     session = None
+#     if CookingSession.objects.filter(owner=current_user, recipe__id=recipe_id).exists():
+#         session = CookingSession.objects.get(owner=current_user, recipe__id=recipe_id)
+#     else:
+#         session = CookingSession.objects.create(owner=current_user, recipe=Recipe.objects.get(id=recipe_id))
+#     return JsonResponse(SessionSerializer(session).data)
+
+class startNewSession(viewsets.ModelViewSet):
+
+    queryset = CookingSession.objects.all()
+    serializer_class = SessionSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+    def perform_create(self, serializer):
+        print(self.request.user)
+
+    def get_queryset(self):
+        print(self.request.user)
+        current_user = self.request.user
+        recipe_id = self.request.GET['recipe_id']
+        session = None
+        if CookingSession.objects.filter(owner=current_user, recipe__id=recipe_id).exists():
+            session = CookingSession.objects.get(owner=current_user, recipe__id=recipe_id)
+        else:
+            session = CookingSession.objects.create(owner=current_user, recipe=Recipe.objects.get(id=recipe_id))
+            print("Worksteps: ", session.recipe.get_work_steps())
+            session.current_step = session.recipe.get_work_steps()[0].id
+            session.save()
+        return [session,]
+
+class GetActiveSessions(viewsets.ModelViewSet):
+
+    queryset = CookingSession.objects.all()
+    serializer_class = SessionSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+    def get_queryset(self):
+        print(self.request.user)
+        current_user = self.request.user
+
+        return CookingSession.objects.filter(owner_id=current_user)
+
+
+def getWorkstep(request, step_id):
+    print(step_id)
+    return JsonResponse(WorkStepSerializer(WorkStep.objects.get(id=step_id)).data)

@@ -5,6 +5,7 @@ import { catchError, map, tap } from 'rxjs/operators';
 
 import {CookSession, Ingredient, Recipe, Workstep} from './recipe';
 
+import {UserService} from './user.service';
 
 
 const httpOptions = {
@@ -24,11 +25,13 @@ export class ApiService {
   private recipeUrl = this.urlPrefix + '/api/recipe';
   private ingredientUrl = this.urlPrefix + '/api/ingredient';
   private workstepsUrl = this.urlPrefix + '/api/worksteps/';
+  private workstepUrl = this.urlPrefix + '/api/workstep/';
   private startSessionUrl = this.urlPrefix + '/api/startsession/';
+  private getSessionsUrl = this.urlPrefix + '/api/getsessions/';
 
   private loginUrl = this.urlPrefix + '/api/rest-auth/login/';
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private userService: UserService) { }
 
 
   getRecipes(): Observable<Recipe[]> {
@@ -50,20 +53,38 @@ export class ApiService {
     return this.http.get<Workstep[]>(url, httpOptions).pipe(catchError(this.handleError<Workstep[]>('getIngedients', null)));
   }
 
+  getWorkstep(id: number): Observable<Workstep> {
+    const url = `${this.workstepUrl}${id}/`;
+    return this.http.get<Workstep>(url, httpOptions).pipe(catchError(this.handleError<Workstep>('getIngedients', null)));
+  }
+
   askForNewCookSession(recipeId: number): Observable<CookSession> {
-    const url = `${this.startSessionUrl}${recipeId}`;
+    const url = `${this.startSessionUrl}?recipe_id=${recipeId}`;
     let params = new HttpParams();
-    const options = {
-      params: params,
-      reportProgress: true,
-      withCredentials: true,
+    let options = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+        'Authorization': 'JWT ' + this.userService.token
+      })
     };
     return this.http.get<CookSession>(url, options).pipe(catchError(this.handleError<CookSession>('startNewSession', null)));
 
   }
 
+  getActiveSessions(): Observable<CookSession[]> {
+    const url = `${this.getSessionsUrl}`;
+    let params = new HttpParams();
+    let options = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+        'Authorization': 'JWT ' + this.userService.token
+      })
+    };
+    return this.http.get<CookSession[]>(url, options).pipe(catchError(this.handleError<CookSession[]>('startNewSession', null)));
+  }
+
   authenticate() {
-    this.http.post(this.loginUrl,
+    /*this.http.post(this.loginUrl,
       {
         "username": "alex",
         "password": "stein123"
@@ -79,12 +100,11 @@ export class ApiService {
         },
         () => {
           console.log("The POST observable is now completed.");
-        });
+        });*/
   }
 
   private handleError<T>(operation = 'operation', result?: T) {
     return (error: any): Observable<T> => {
-      // TODO: send the error to remote logging infrastructure
       console.error(error); // log to console instead
       return of(result as T);
     };
