@@ -80,9 +80,6 @@ class startNewSession(viewsets.ModelViewSet):
             session = CookingSession.objects.get(owner=current_user, recipe__id=recipe_id)
         else:
             session = CookingSession.objects.create(owner=current_user, recipe=Recipe.objects.get(id=recipe_id))
-            print("Worksteps: ", session.recipe.get_work_steps())
-            session.current_step = session.recipe.get_work_steps()[0].id
-            session.save()
         return [session,]
 
 class GetActiveSessions(viewsets.ModelViewSet):

@@ -5,3 +5,4 @@ Pillow
 django-rest-auth
 djangorestframework-jwt
 channels
+channels_redis
