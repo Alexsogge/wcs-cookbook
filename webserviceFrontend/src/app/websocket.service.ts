@@ -1,36 +1,43 @@
 import { Injectable } from '@angular/core';
-import { Socket } from 'ngx-socket-io';
-import {Message} from "./recipe";
+import {Observable, Observer, Subject} from 'rxjs';
+import 'rxjs/add/operator/map';
+import {UserService} from './user.service';
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class WebsocketService {
-  currentMessage = this.socket.fromEvent<Message>('message');
-  messages = this.socket.fromEvent<string[]>('messages');
 
-  constructor(private socket: Socket) { }
+  private socket: WebSocket;
+  public messages: Subject<string>;
 
-  getDocument(id: string) {
-    this.socket.emit('getmsg', id);
+  constructor(private userService: UserService) { }
+
+  public connect(url): Subject<MessageEvent> {
+    const socket = new WebSocket('ws://' + window.location.hostname + ':8000/ws/api/' + url + '?Authorization=' + this.userService.token);
+
+    const observable = Observable.create(
+      (obs: Observer<MessageEvent>) => {
+        socket.onmessage = obs.next.bind(obs);
+        socket.onerror = obs.error.bind(obs);
+        socket.onclose = obs.complete.bind(obs);
+        return socket.close.bind(socket);
+      });
+    const observer = {
+      next: (data: string) => {
+        if (socket.readyState === WebSocket.OPEN) {
+          socket.send(data);
+          if (data === 'stop') {
+            socket.close(1000, 'bye');
+          }
+        }
+      }
+    };
+    return Subject.create(observer, observable);
   }
 
-  newDocument() {
-    this.socket.emit('addmsg', { id: this.msgId(), doc: '' });
-  }
-
-  editDocument(message: Document) {
-    this.socket.emit('editmsg', message);
-  }
-
-  private msgId() {
-    let text = '';
-    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-
-    for (let i = 0; i < 5; i++) {
-      text += possible.charAt(Math.floor(Math.random() * possible.length));
-    }
-
-    return text;
+  sendMSG(messgae: string) {
+    this.socket.send(messgae);
   }
 }

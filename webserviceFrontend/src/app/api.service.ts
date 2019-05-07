@@ -83,26 +83,6 @@ export class ApiService {
     return this.http.get<CookSession[]>(url, options).pipe(catchError(this.handleError<CookSession[]>('startNewSession', null)));
   }
 
-  authenticate() {
-    /*this.http.post(this.loginUrl,
-      {
-        "username": "alex",
-        "password": "stein123"
-      })
-      .subscribe(
-        (val) => {
-          console.log("POST call successful value returned in body",
-            val);
-          sessionStorage.setItem("key", val["key"]);
-        },
-        response => {
-          console.log("POST call in error", response);
-        },
-        () => {
-          console.log("The POST observable is now completed.");
-        });*/
-  }
-
   private handleError<T>(operation = 'operation', result?: T) {
     return (error: any): Observable<T> => {
       console.error(error); // log to console instead

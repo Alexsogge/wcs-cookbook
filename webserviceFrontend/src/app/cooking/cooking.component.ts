@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import {CookSession, Workstep} from "../recipe";
-import {ApiService} from "../api.service";
-import {ActivatedRoute} from "@angular/router";
-import {WebsocketService} from "../websocket.service";
-import {Observable, Subscription} from "rxjs";
+import {CookSession, Recipe, Workstep} from '../recipe';
+import {ApiService} from '../api.service';
+import {ActivatedRoute} from '@angular/router';
+import {WebsocketService} from '../websocket.service';
+import {Observable, Subject, Subscription} from 'rxjs';
 
 
 @Component({
@@ -13,13 +13,12 @@ import {Observable, Subscription} from "rxjs";
 })
 export class CookingComponent implements OnInit {
 
-  messages: Observable<string[]>;
-  currentMessage: string;
-  private _msgSub: Subscription;
-
-  private activeSession: CookSession;
+  private activeSession: CookSession = new CookSession();
   private sessionId;
   private currentStep: Workstep;
+  private currentRecipe: Recipe;
+
+  public messages: Subject<string>;
 
   ioConnection: any;
 
@@ -34,20 +33,48 @@ export class CookingComponent implements OnInit {
     for (const session of sessions) {
       if (session.id === this.sessionId) {
         this.activeSession = session;
-        this.apiService.getWorkstep(session.currentStep).subscribe(step => this.currentStep = step);
+        this.apiService.getRecipe(session.recipe).subscribe(recipe => { this.currentRecipe = recipe; this.initWorkstep(); });
         this.initSocket();
         break;
       }
     }
   }
 
-  ngOnDestroy() {
-    this._msgSub.unsubscribe();
+  initWorkstep() {
+    this.apiService.getWorkstep(this.currentRecipe.workSteps[this.activeSession.currentStep]).subscribe(
+      workstep => this.currentStep = workstep
+    );
+  }
+
+  nextStep() {
+    this.messages.next(JSON.stringify({message: 'next_step'}));
+  }
+
+  previousStep() {
+    this.messages.next(JSON.stringify({message: 'previous_step'}));
   }
 
   initSocket() {
-    this.messages = this.websocket.messages;
-    this._msgSub = this.websocket.currentMessage.subscribe(msg => this.currentMessage = msg.id);
+    // this.websocket.connect();
+    // this.websocket.sendMSG("Test");
+
+    this.messages = this.websocket.connect(`${this.sessionId}/`)
+      .map((response: MessageEvent): string => {
+        return  response.data;
+      }) as Subject<string>;
+    this.messages.subscribe(msg => {
+        console.log('from server:' + msg);
+        this.reciveMessage(msg);
+      }
+    );
+  }
+
+  reciveMessage(msg) {
+    const msgBody = JSON.parse(msg).message;
+    if (msgBody.event === 'step_update') {
+      this.activeSession.currentStep = msgBody.new_step;
+      this.currentStep.description = msgBody.step_desc;
+    }
   }
 
 

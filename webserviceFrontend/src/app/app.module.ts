@@ -14,7 +14,6 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 import {MatToolbarModule} from '@angular/material/toolbar';
 import {MatInputModule} from '@angular/material/input';
 
-import { SocketIoModule, SocketIoConfig } from 'ngx-socket-io';
 
 
 import { NavigationComponent } from './navigation/navigation.component';
@@ -27,7 +26,6 @@ import { LoginComponent } from './login/login.component';
 import { ProfileComponent } from './profile/profile.component';
 
 
-const config: SocketIoConfig = { url: 'ws://localhost:8000/ws/api/', options: {} };
 
 
 @NgModule({
@@ -59,8 +57,6 @@ const config: SocketIoConfig = { url: 'ws://localhost:8000/ws/api/', options: {}
     MatInputModule,
     MatListModule,
     MatTableModule,
-    BrowserModule,
-    SocketIoModule.forRoot(config),
   ],
   providers: [UserService],
   bootstrap: [AppComponent],
