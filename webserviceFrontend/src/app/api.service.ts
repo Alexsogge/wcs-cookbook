@@ -19,7 +19,7 @@ const httpOptions = {
 })
 export class ApiService {
 
-  private urlPrefix = 'http://localhost:8000';
+  private urlPrefix = 'http://192.168.1.102:8000';
 
   private recipesUrl = this.urlPrefix + '/api/recipes/';
   private recipeUrl = this.urlPrefix + '/api/recipe';
