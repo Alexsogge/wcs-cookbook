@@ -4,7 +4,7 @@ import {HttpClient, HttpHeaders} from '@angular/common/http';
 @Injectable()
 export class UserService {
 
-  private authUrl = 'http://192.168.1.102:8000/api/api-token-auth/';
+  private authUrl = 'http://localhost:8000/api/api-token-auth/';
 
   // http options used for making API calls
   private httpOptions: any;
