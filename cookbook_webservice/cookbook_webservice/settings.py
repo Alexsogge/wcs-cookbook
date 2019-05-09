@@ -26,7 +26,7 @@ SECRET_KEY = 'xn+0$%cyh_(+#&(!3y0nc4-yonk)7w#antw-a!y9wq&fd-_)v0'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.1.102']
+ALLOWED_HOSTS = ['192.168.1.102', '10.126.134.234', 'localhost', '192.168.43.249']
 
 
 # Application definition
@@ -83,9 +83,13 @@ WSGI_APPLICATION = 'cookbook_webservice.wsgi.application'
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+     'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'db_post',
+        'USER': 'username',
+        'PASSWORD': 'mypassword',
+        'HOST': '127.0.0.1',
+        'PORT': '5432',
     }
 }
 
