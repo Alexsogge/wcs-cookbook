@@ -6,6 +6,7 @@ import { catchError, map, tap } from 'rxjs/operators';
 import {CookSession, Ingredient, Recipe, Workstep} from './recipe';
 
 import {UserService} from './user.service';
+import {Globals} from './global';
 
 
 const httpOptions = {
@@ -19,7 +20,7 @@ const httpOptions = {
 })
 export class ApiService {
 
-  private urlPrefix = 'http://localhost:8000';
+  private urlPrefix = Globals.BACKEND_WEB_URL;
 
   private recipesUrl = this.urlPrefix + '/api/recipes/';
   private recipeUrl = this.urlPrefix + '/api/recipe';
