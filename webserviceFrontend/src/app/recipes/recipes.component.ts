@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import {Recipe} from '../recipe';
 import {ApiService} from '../api.service';
+import {Globals} from '../global';
 
 @Component({
   selector: 'app-recipes',
@@ -10,6 +11,7 @@ import {ApiService} from '../api.service';
 export class RecipesComponent implements OnInit {
 
   public recipes: Recipe[] = [];
+  public BACKEND_WEB_URL = Globals.BACKEND_WEB_URL;
   constructor(private apiService: ApiService) { }
 
   ngOnInit() {

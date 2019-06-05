@@ -1,10 +1,11 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
+import {Globals} from './global';
 
 @Injectable()
 export class UserService {
 
-  private authUrl = 'http://localhost:8000/api/api-token-auth/';
+  private authUrl = Globals.BACKEND_WEB_URL + '/api/api-token-auth/';
 
   // http options used for making API calls
   private httpOptions: any;

@@ -1,5 +1,5 @@
 <div fxLayout="row">
-  <div fxFlex><img src="http://localhost:8000{{recipe.imageurl}}"></div>
+  <div fxFlex><img src="{{BACKEND_WEB_URL}}{{recipe.imageurl}}"></div>
   <div fxFlex fxFlexOffset="20" class="action_section">
     <button mat-raised-button color="primary" (click)="startCooking()">Start cooking</button>
   </div>

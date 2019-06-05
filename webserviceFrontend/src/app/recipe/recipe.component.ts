@@ -3,6 +3,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 
 import {CookSession, Ingredient, Recipe, Workstep} from '../recipe';
 import {ApiService} from '../api.service';
+import {Globals} from '../global';
 
 @Component({
   selector: 'app-recipe',
@@ -12,6 +13,8 @@ import {ApiService} from '../api.service';
 export class RecipeComponent implements OnInit {
 
   columnsToDisplay = ['amount', 'name'];
+
+  public BACKEND_WEB_URL = Globals.BACKEND_WEB_URL;
 
   private recipeId: number;
   private recipe: Recipe = new Recipe();
