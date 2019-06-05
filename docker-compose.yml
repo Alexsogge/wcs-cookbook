@@ -7,6 +7,8 @@ services:
     volumes:
       - ./volumes/db:/var/lib/postgresql/data
     restart: always
+    labels:
+      - "traefik.enable=false"
     environment:
       - BACKUP_DATABASE=true
       - BACKUP_DATABASE_TYPE=postgres
@@ -16,34 +18,56 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password
 
-  cookbookserv-nginx:
+  redis:
+    image: redis
+    labels:
+     - "traefik.enable=false"
+
+
+
+  nginx:
     image: nginx
-    container_name: cookbookserv-nginx
     volumes:
       - "./volumes/nginx/nginx.conf:/etc/nginx/conf.d/default.conf"
       - "./volumes/static/:/static"
       - "./volumes/well-known/:/well-known"
-    environment:
-      - VIRTUAL_HOST=wcs.example.org
-      - VIRTUAL_PORT=80
-      - LETSENCRYPT_HOST=wcs.example.org
-      - LETSENCRYPT_EMAIL=mail@example.org
     depends_on:
       - db
+      - web
+    labels:
+      - "traefik.docker.network=proxy"
+      - "traefik.enable=true"
+      - "traefik.basic.frontend.rule=Host:wcs.henkela.de"
+      - "traefik.basic.frontent.port=8000"
+      - "traefik.passHostHeader=true"
     networks:
       - default
-      - external
+      - proxy
+  
+  angular:
+    build: webserviceFrontend/
+    volumes:
+      - './webserviceFrontend:/app'
+      - './volumes/node_modules:/app/node_modules'
+    labels:
+      - "traefik.docker.network=proxy"
+      - "traefik.enable=true"
+      - "traefik.basic.frontend.rule=Host:wcsb.henkela.de"
+      - "traefik.basic.frontent.port=80"
+    networks:
+      - default
+      - proxy
 
-  wcs-web:
+  web:
     build: cookbook_webservice/
-    command: uwsgi --ini mysite_uwsgi.ini
+    command: daphne cookbookserv.asgi:application
     volumes:
       - ./cookbook_webservice:/code
       - ./volumes/static:/static
       - ./.git/HEAD:/code/.git/HEAD:ro
       - ./.git/refs:/code/.git/refs:ro
-    expose:
-      - "8099"
+    labels:
+      - "traefik.enable=false"
     links:
       - "db:db"
     depends_on:
@@ -52,6 +76,5 @@ services:
       - default
 
 networks:
-  external:
-    external:
-      name: network_main_net
+  proxy:
+    external: true
