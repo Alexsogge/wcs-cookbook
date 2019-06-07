@@ -4,6 +4,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {CookSession, Ingredient, Recipe, Workstep} from '../recipe';
 import {ApiService} from '../api.service';
 import {Globals} from '../global';
+import {UserService} from '../user.service';
 
 @Component({
   selector: 'app-recipe',
@@ -21,7 +22,7 @@ export class RecipeComponent implements OnInit {
   private ingredients: Ingredient[] = [];
   private worksteps: Workstep[] = [];
 
-  constructor(private route: ActivatedRoute, private apiService: ApiService, private router: Router) { }
+  constructor(private route: ActivatedRoute, private apiService: ApiService, private router: Router, private userService: UserService) { }
 
   ngOnInit() {
     this.recipeId = +this.route.snapshot.paramMap.get('id');
