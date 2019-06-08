@@ -19,6 +19,7 @@ android {
         noCompress "wcs-keras-model.pb"
         noCompress "frozen_optimized_quant.pb"
         noCompress "latest.pb"
+        noCompress "keras_gesture_model.tflite"
     }
 }
 
