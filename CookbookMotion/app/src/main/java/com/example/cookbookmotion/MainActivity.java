@@ -18,7 +18,7 @@ import java.util.List;
 import static java.lang.Math.abs;
 
 
-public class MainActivity extends WearableActivity implements SensorEventListener {
+public class MainActivity extends WearableActivity{
 
     private static final int SENSOR_COUNT = 3;
     private static final double RATE = 50.;
@@ -27,12 +27,11 @@ public class MainActivity extends WearableActivity implements SensorEventListene
     private TextView mTextView;
     private MotionClassifier motionClassifier;
 
-    private SensorManager sensorManager;
-    private Sensor mSensor;
+    private MotionRecorder motionRecorder;
 
-    private ByteBuffer sensorData;
-    private ByteBuffer sensorDataStream;
-
+    interface PeakCallbackInterface {
+        boolean classifyPeak(ByteBuffer frame);
+    }
 
 
     @Override
@@ -51,49 +50,43 @@ public class MainActivity extends WearableActivity implements SensorEventListene
             e.printStackTrace();
         }
 
-        sensorDataStream = ByteBuffer.allocateDirect(SENSOR_COUNT * 2000 * 4);
-        sensorDataStream.order(ByteOrder.nativeOrder());
-
-        sensorData = ByteBuffer.allocateDirect(SENSOR_COUNT * 100 * 4);
-        sensorData.order(ByteOrder.nativeOrder());
-
-        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        motionRecorder = new MotionRecorder(this, new PeakCallbackInterface() {
+            @Override
+            public boolean classifyPeak(ByteBuffer frame) {
+                return ClassifyPeak(frame);
+            }
+        });
+        motionRecorder.startRecording();
     }
 
 
-    @Override
-    public void onSensorChanged(SensorEvent event) {
-        Log.d("Sensor", event.sensor.getStringType());
-        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            getAccelerometer(event);
+
+    private boolean ClassifyPeak(ByteBuffer frame){
+        Log.d("callback", "Classify Peak");
+        float[][] labelProbArray = motionClassifier.RunInference(frame);
+
+        Log.d("Pred", "Predicted: " + labelProbArray[0][0] + " " + labelProbArray[0][1] + " " + labelProbArray[0][2]);
+
+        float max_pred = labelProbArray[0][0];
+        String gesture = "Noise";
+        if (labelProbArray[0][1] > max_pred){
+            gesture = "Left";
+            max_pred = labelProbArray[0][1];
         }
-
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
-    }
-
-    private void getAccelerometer(SensorEvent event) {
-        float[] values = event.values;
-        // Movement
-        float x = values[0] / 15;
-        float y = values[1] / 15;
-        float z = values[2] / 15;
-
-
-        sensorDataStream.putFloat(x);
-        sensorDataStream.putFloat(y);
-        sensorDataStream.putFloat(z);
-
-        if (sensorDataStream.remaining() == 0) {
-            Log.d("Sensor", "Buffer full!!");
-            // float[][] labelProbArray = motionClassifier.RunInference(sensorData);
-            // Log.d("Pred", "Predicted: " + labelProbArray[0][0] + " " + labelProbArray[0][1] + " " + labelProbArray[0][2]);
-            sensorDataStream.clear();
+        if (labelProbArray[0][2] > max_pred){
+            gesture = "Right";
         }
+        Log.d("Pred", "=>: " + gesture);
+        TextView gestureList = (TextView)findViewById(R.id.textView2);
+        gestureList.append(gesture + "\n");
 
+        if (gesture.equals("Noise"))
+            return false;
+        return true;
+    }
+
+    /*
+    private void CheckGesture(){
         int currentStreamPos = sensorDataStream.position();
 
         if (currentStreamPos > SENSOR_COUNT * 101 * 4 ) {
@@ -138,34 +131,6 @@ public class MainActivity extends WearableActivity implements SensorEventListene
 
             }
         }
-
-
     }
-
-    @Override
-    public void onPointerCaptureChanged(boolean hasCapture) {
-
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        // register this class as a listener for the orientation and
-        // accelerometer sensors
-        sensorManager.registerListener(this,
-                sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
-                20000);
-    }
-
-    @Override
-    protected void onPause() {
-        // unregister listener
-        super.onPause();
-        sensorManager.unregisterListener(this);
-    }
-
-
-
-
-
+    */
 }
