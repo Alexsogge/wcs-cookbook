@@ -33,10 +33,8 @@ import okio.ByteString;
 
 public class WebAPIManager {
 
-    private static final String WEB_HOST_NAME = "http://localhost:8000";
-    private static final String SOCK_HOST_NAME = "ws://localhost:8000";
-
-
+    //private static final String WEB_HOST_NAME = "http://localhost:8000";
+    //private static final String SOCK_HOST_NAME = "ws://localhost:8000";
 
     private String username;
     private String password;
@@ -70,13 +68,14 @@ public class WebAPIManager {
             public void httpResponseCallback(String response) {
                 httpResponse(response);
                 authendicated();
-                getSessions();
+                if (token != null)
+                    getSessions();
             }
         }, null).execute("");
     }
 
     public void connectSession(int sessionID){
-        Request request = new Request.Builder().url(SOCK_HOST_NAME + "/ws/api/" + sessionID + "/?Authorization="+webConnection.getToken()).build();
+        Request request = new Request.Builder().url(ConfigValues.SOCK_HOST_NAME + "/ws/api/" + sessionID + "/?Authorization="+webConnection.getToken()).build();
         socketConnection = new SocketConnection();
         WebSocket ws = client.newWebSocket(request, socketConnection);
         socket = ws;
@@ -85,6 +84,9 @@ public class WebAPIManager {
 
     private void authendicated(){
         token = webConnection.getToken();
+        if (token == null){
+            sockCallResp.loginCallback(false);
+        }
     }
 
     private void httpResponse(String response){
@@ -122,7 +124,7 @@ public class WebAPIManager {
                     e.printStackTrace();
                 }
             }
-        }, token).execute(WEB_HOST_NAME + "/api/getsessions/");
+        }, token).execute(ConfigValues.WEB_HOST_NAME + "/api/getsessions/");
     }
 
     private void output(final String txt) {
@@ -278,7 +280,7 @@ public class WebAPIManager {
 
 
             try {
-                URL url = new URL(WEB_HOST_NAME + "/api/api-token-auth/");
+                URL url = new URL(ConfigValues.WEB_HOST_NAME + "/api/api-token-auth/");
                 HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoOutput(true);
                 OutputStreamWriter wr = new OutputStreamWriter(urlConnection.getOutputStream());

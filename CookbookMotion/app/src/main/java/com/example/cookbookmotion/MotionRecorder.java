@@ -22,7 +22,6 @@ import static java.lang.Math.abs;
 
 public class MotionRecorder implements SensorEventListener {
 
-    private static final int SENSOR_COUNT = 3;
     private static final double RATE = 50.;
     private static final int WINDOW_SIZE = 100;
     private static final float PEAK_THRESHOLD = 8;
