@@ -1,14 +1,25 @@
 package com.example.cookbookmotion;
 
+import android.app.ActionBar;
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.wearable.activity.WearableActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -28,9 +39,21 @@ public class MainActivity extends WearableActivity{
     private MotionClassifier motionClassifier;
 
     private MotionRecorder motionRecorder;
+    private WebAPIManager webAPIManager;
+
+    private Button next;
+
+    private LinearLayout sessionList;
+
+    private Button[] sessionButtons;
 
     interface PeakCallbackInterface {
         boolean classifyPeak(ByteBuffer frame);
+    }
+
+    interface SockResponseCallbackInterface {
+        void sockResponseCallback(String text);
+        void sessionCallback(JSONArray sessions);
     }
 
 
@@ -42,6 +65,8 @@ public class MainActivity extends WearableActivity{
         mTextView = (TextView) findViewById(R.id.text);
         // Enables Always-on
         setAmbientEnabled();
+
+        sessionList = (LinearLayout) findViewById(R.id.sessionlist);
 
 
         try {
@@ -57,8 +82,74 @@ public class MainActivity extends WearableActivity{
             }
         });
         motionRecorder.startRecording();
+        webAPIManager = new WebAPIManager("user", "password", new SockResponseCallbackInterface(){
+
+            @Override
+            public void sockResponseCallback(final String text) {
+                Handler handler = new Handler(Looper.getMainLooper());
+
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        int duration = Toast.LENGTH_SHORT;
+                        CharSequence chText = text;
+
+                        Toast toast = Toast.makeText(getApplicationContext(), chText, duration);
+                        toast.show();
+                    }
+                }, 1000 );
+            }
+
+            @Override
+            public void sessionCallback(JSONArray sessions) {
+                buildSessionList(sessions);
+            }
+        }, this);
+        next = (Button) findViewById(R.id.button3);
+        next.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d("Test", "Pressed button");
+                webAPIManager.nextStep();
+            }
+        });
+
     }
 
+
+    private void buildSessionList(final JSONArray sessions){
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                sessionButtons = new Button[sessions.length()];
+
+                for (int i = 0; i < sessions.length(); i++) {
+                    try {
+                        final JSONObject session = sessions.getJSONObject(i);
+                        sessionButtons[i] = new Button(getApplicationContext());
+                        sessionButtons[i].setText(session.getString("recipeName"));
+                        sessionButtons[i].setLayoutParams(new ActionBar.LayoutParams(ActionBar.LayoutParams.FILL_PARENT,
+                                ActionBar.LayoutParams.WRAP_CONTENT));
+                        sessionButtons[i].setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                Log.d("Test", "Pressed button");
+                                try {
+                                    webAPIManager.connectSession(session.getInt("id"));
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
+                        sessionList.addView(sessionButtons[i]);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+    }
 
 
     private boolean ClassifyPeak(ByteBuffer frame){
@@ -79,6 +170,11 @@ public class MainActivity extends WearableActivity{
         Log.d("Pred", "=>: " + gesture);
         TextView gestureList = (TextView)findViewById(R.id.textView2);
         gestureList.append(gesture + "\n");
+
+        if (gesture.equals("Left"))
+            webAPIManager.prevStep();
+        if (gesture.equals("Right"))
+            webAPIManager.nextStep();
 
         if (gesture.equals("Noise"))
             return false;

@@ -176,16 +176,16 @@ public class MotionRecorder implements SensorEventListener {
         // last z value
         float z_last = sensorFrame.get((WINDOW_SIZE - 1) * mChanelCount + accelerometerOffset + 2);
 
-        Log.d("look", (accelerometerOffset + 2) + " " + ((WINDOW_SIZE / 2) * mChanelCount + accelerometerOffset + 2) + " " + ((WINDOW_SIZE - 1) * mChanelCount + accelerometerOffset + 2));
+        // Log.d("look", (accelerometerOffset + 2) + " " + ((WINDOW_SIZE / 2) * mChanelCount + accelerometerOffset + 2) + " " + ((WINDOW_SIZE - 1) * mChanelCount + accelerometerOffset + 2));
 
-        Log.d("look", "Test: "+ z_first + " "+ z_mid + " "+ z_last);
+        // Log.d("look", "Test: "+ z_first + " "+ z_mid + " "+ z_last);
 
 
         if (abs(z_first) < LOW_THRESHOLD / NORMALIZE_ACCELEROMETER &&
                 abs(z_mid) > PEAK_THRESHOLD / NORMALIZE_ACCELEROMETER &&
                 abs(z_last) < LOW_THRESHOLD / NORMALIZE_ACCELEROMETER) {
-            Log.d("peak", "Found peak");
-            //Log.d("peak", sensorFrame.toString());
+            // Log.d("peak", "Found peak");
+            // Log.d("peak", sensorFrame.toString());
             boolean isGesture = callbackInterface.classifyPeak(sensorFrame.getFrame());
             if(isGesture)
                 sensorFrame.clear();
