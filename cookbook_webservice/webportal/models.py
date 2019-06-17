@@ -31,6 +31,9 @@ class Ingredient(models.Model):
 class WorkStep(models.Model):
     description = models.CharField(max_length=1000)
 
+    def __str__(self):
+        return self.description
+
 
 class Recipe(models.Model):
     name = models.CharField(max_length=200)
@@ -40,6 +43,9 @@ class Recipe(models.Model):
 
     tags = models.ManyToManyField(Tag)
     image = models.ImageField(blank=True, null=True)
+
+    def __str__(self):
+        return self.name
 
     def get_work_steps(self):
         return self.work_steps.order_by('recipeworkstep')
@@ -52,6 +58,9 @@ class RecipeWorkStep(models.Model):
 
     class Meta:
         ordering = ('step_number',)
+
+    def __str__(self):
+        return '{} at {}'.format(self.workstep.description, self.step_number)
 
 
 class CookingSession(models.Model):
