@@ -25,6 +25,7 @@
     "core-js": "^2.5.4",
     "hammerjs": "^2.0.8",
     "install": "^0.12.2",
+    "ngx-toastr": "^10.0.4",
     "npm": "^6.9.0",
     "rxjs": "~6.3.3",
     "rxjs-compat": "^6.5.1",

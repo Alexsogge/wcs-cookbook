@@ -8,6 +8,7 @@ import {RecipeComponent} from './recipe/recipe.component';
 import {LoginComponent} from './login/login.component';
 import {CookingComponent} from './cooking/cooking.component';
 import {ProfileComponent} from './profile/profile.component';
+import {RegisterComponent} from "./register/register.component";
 
 
 const routes: Routes = [
@@ -17,6 +18,7 @@ const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'cooking/:id', component: CookingComponent },
   { path: 'profile', component: ProfileComponent },
+  { path: 'register', component: RegisterComponent },
 ];
 
 

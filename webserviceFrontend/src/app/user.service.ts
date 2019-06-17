@@ -1,11 +1,13 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Globals} from './global';
+import {ToastrService} from "ngx-toastr";
 
 @Injectable()
 export class UserService {
 
   private authUrl = Globals.BACKEND_WEB_URL + '/api/api-token-auth/';
+  private registerUrl = Globals.BACKEND_WEB_URL + '/api/register/';
 
   // http options used for making API calls
   private httpOptions: any;
@@ -22,7 +24,7 @@ export class UserService {
   // error messages received from the login attempt
   public errors: any = [];
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private toastr: ToastrService) {
     this.httpOptions = {
       headers: new HttpHeaders({'Content-Type': 'application/json'})
     };
@@ -36,6 +38,19 @@ export class UserService {
       },
       err => {
         this.errors = err['error'];
+      }
+    );
+  }
+
+  public register(user) {
+    this.http.post(this.registerUrl, JSON.stringify(user), this.httpOptions).subscribe(
+      data => {
+        if ('error' in data) {
+          this.errors = data['error'];
+          this.toastr.error(this.errors, 'Can\'t create user');
+        } else {
+          this.toastr.success('Registered user');
+        }
       }
     );
   }

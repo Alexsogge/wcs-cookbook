@@ -24,6 +24,8 @@ import { CookingComponent } from './cooking/cooking.component';
 import {UserService} from './user.service';
 import { LoginComponent } from './login/login.component';
 import { ProfileComponent } from './profile/profile.component';
+import { RegisterComponent } from './register/register.component';
+import { ToastrModule } from 'ngx-toastr';
 
 
 
@@ -39,6 +41,7 @@ import { ProfileComponent } from './profile/profile.component';
     CookingComponent,
     LoginComponent,
     ProfileComponent,
+    RegisterComponent,
   ],
   imports: [
     BrowserModule,
@@ -57,6 +60,7 @@ import { ProfileComponent } from './profile/profile.component';
     MatInputModule,
     MatListModule,
     MatTableModule,
+    ToastrModule.forRoot(), // ToastrModule added
   ],
   providers: [UserService],
   bootstrap: [AppComponent],

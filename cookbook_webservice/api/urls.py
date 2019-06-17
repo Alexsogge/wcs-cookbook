@@ -17,11 +17,13 @@ router.register(r'startsession', views.startNewSession)
 router.register(r'getsessions', views.GetActiveSessions)
 
 
+
 urlpatterns = [
     path('', include(router.urls)),
     path('recipe/<int:id>/', views.getRecipeSerialization),
     path('ingredient/<int:id>/', views.getIngredient),
     path('workstep/<int:step_id>/', views.getWorkstep),
+    path(r'register/', views.RegisterUser.as_view()),
     #path('startsession/<int:recipe_id>', views.startNewSession),
     path('rest-auth/', include('rest_auth.urls')),
     path(r'api-token-auth/', obtain_jwt_token),

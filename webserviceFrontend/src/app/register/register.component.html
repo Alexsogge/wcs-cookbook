@@ -1,0 +1,26 @@
+<h2>Register</h2>
+<div fxLayout="column">
+  <div>
+    <mat-form-field>
+      <label>Username:</label><br />
+      <input matInput type="text" name="login-username" [(ngModel)]="user.username">
+    </mat-form-field>
+    <span *ngFor="let error of userService.errors.username"><br />
+      {{ error }}</span></div>
+  <div>
+    <mat-form-field>
+      <label>Password:</label>
+      <input matInput type="password" name="login-password" [(ngModel)]="user.password">
+    </mat-form-field>
+    <span *ngFor="let error of userService.errors.password"><br />
+      {{ error }}</span>
+  </div>
+
+  <div>
+    <button mat-raised-button (click)="register()" class="btn btn-primary">Register</button>
+  </div>
+
+  <div>
+    <span *ngFor="let error of userService.errors.non_field_errors">{{ error }}<br /></span>
+  </div>
+</div>

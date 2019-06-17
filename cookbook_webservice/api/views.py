@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponseNotFound
 from django.shortcuts import render
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, status
 from api.serializers import *
 from webportal.models import *
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
@@ -95,6 +95,21 @@ class GetActiveSessions(viewsets.ModelViewSet):
         return CookingSession.objects.filter(owner_id=current_user)
 
 
+
+class RegisterUser(APIView):
+
+    def post(self, request, format=None):
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return  JsonResponse({"error": "Not a valid user"})
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 def getWorkstep(request, step_id):
     print(step_id)
     return JsonResponse(WorkStepSerializer(WorkStep.objects.get(id=step_id)).data)
+
+

@@ -1,13 +1,13 @@
 <h2>Log In</h2>
-<div class="row" *ngIf="!userService.token">
-  <div class="col-sm-4">
+<div fxLayout="column" *ngIf="!userService.token">
+  <div>
     <mat-form-field>
     <label>Username:</label><br />
     <input matInput type="text" name="login-username" [(ngModel)]="user.username">
     </mat-form-field>
     <span *ngFor="let error of userService.errors.username"><br />
       {{ error }}</span></div>
-  <div class="col-sm-4">
+  <div>
     <mat-form-field>
       <label>Password:</label>
       <input matInput type="password" name="login-password" [(ngModel)]="user.password">
@@ -15,10 +15,17 @@
     <span *ngFor="let error of userService.errors.password"><br />
       {{ error }}</span>
   </div>
-  <div class="col-sm-4">
-    <button mat-raised-button (click)="login()" class="btn btn-primary">Log In</button>
+
+  <div fxLayout="column" fxLayoutGap="20px">
+    <div>
+      <a routerLink="/register">Register</a>
+    </div>
+    <div>
+      <button mat-raised-button (click)="login()" class="btn btn-primary">Log In</button>
+    </div>
   </div>
-  <div class="col-sm-12">
+
+  <div>
     <span *ngFor="let error of userService.errors.non_field_errors">{{ error }}<br /></span>
   </div>
 </div>
