@@ -4,6 +4,7 @@ import android.app.ActionBar;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -12,6 +13,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.wearable.activity.WearableActivity;
+import android.text.Layout;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -32,13 +34,17 @@ import static java.lang.Math.abs;
 
 
 public class MainActivity extends WearableActivity{
-        private TextView mTextView;
+    private static double FACTOR = 0.146467; // c = a * sqrt(2)
+
+    private TextView mTextView;
     private MotionClassifier motionClassifier;
 
     private MotionRecorder motionRecorder;
     private WebAPIManager webAPIManager;
 
     private Button next;
+
+    private Button confBtn;
 
     private LinearLayout sessionList;
 
@@ -69,6 +75,7 @@ public class MainActivity extends WearableActivity{
         SharedPreferences.Editor editor = mySPrefs.edit();
         editor.remove("username");
         editor.apply();*/
+        adjustInset();
     }
 
 
@@ -96,6 +103,16 @@ public class MainActivity extends WearableActivity{
             public void onClick(View view) {
                 Log.d("Test", "Pressed button");
                 webAPIManager.nextStep();
+            }
+        });
+
+        confBtn = (Button) findViewById(R.id.confButton);
+        confBtn.setOnClickListener(new View.OnClickListener(){
+
+            @Override
+            public void onClick(View v) {
+                final Intent i = new Intent(getApplicationContext(), ConfigActivity.class);
+                startActivity(i);
             }
         });
 
@@ -160,11 +177,23 @@ public class MainActivity extends WearableActivity{
         //finishAndRemoveTask();
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        motionRecorder.stopRecording();
+    }
+
     private void buildSessionList(final JSONArray sessions){
 
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                if (sessionButtons != null) {
+                    for (int i = 0; i < sessionButtons.length; i++) {
+                        sessionList.removeView(sessionButtons[i]);
+                    }
+                }
+
                 sessionButtons = new Button[sessions.length()];
 
                 for (int i = 0; i < sessions.length(); i++) {
@@ -174,6 +203,7 @@ public class MainActivity extends WearableActivity{
                         sessionButtons[i].setText(session.getString("recipeName"));
                         sessionButtons[i].setLayoutParams(new ActionBar.LayoutParams(ActionBar.LayoutParams.FILL_PARENT,
                                 ActionBar.LayoutParams.WRAP_CONTENT));
+                        final int finalI = i;
                         sessionButtons[i].setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
@@ -184,6 +214,7 @@ public class MainActivity extends WearableActivity{
                                         e.printStackTrace();
                                     }
                                     motionRecorder.startRecording();
+                                    sessionButtons[finalI].setBackgroundColor(Color.BLUE);
                                 }
                             });
                         sessionList.addView(sessionButtons[i]);
@@ -223,5 +254,20 @@ public class MainActivity extends WearableActivity{
         if (gesture.equals("Noise"))
             return false;
         return true;
+    }
+
+
+    private void adjustInset() {
+
+        if (getResources().getConfiguration().isScreenRound()) {
+
+            int inset = (int)(FACTOR * getResources().getConfiguration().screenWidthDp);
+
+            View layout = (View) findViewById(R.id.mainview);
+
+            layout.setPadding(inset, inset, inset, inset);
+
+        }
+
     }
 }

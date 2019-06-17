@@ -100,6 +100,11 @@ public class MotionRecorder implements SensorEventListener {
     }
 
 
+    public void stopRecording() {
+        SensorManager sm = (SensorManager) mContext.getSystemService(Context.SENSOR_SERVICE);
+        sm.unregisterListener(this);
+    }
+
 
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
