@@ -24,8 +24,13 @@ public class MotionRecorder implements SensorEventListener {
 
     private static final double RATE = 50.;
     private static final int WINDOW_SIZE = 100;
-    private static final float PEAK_THRESHOLD = 8;
-    private static final float LOW_THRESHOLD = 6;
+    private static final float PEAK_THRESHOLD = 9;
+    private static final float LOW_THRESHOLD = 3;
+    private static final int BORDER_POINTS = 5;
+    private static final int SIMPLE_FILTER = 0;
+    private static final int BORDER_FILTER = 1;
+
+    private static final int FILTER_METHOD = BORDER_FILTER;
 
     private static final float NORMALIZE_ACCELEROMETER = 15;
     private static final float NORMALIZE_GYROSCOPE = 3;
@@ -156,7 +161,28 @@ public class MotionRecorder implements SensorEventListener {
 
 
     private void findPeak() {
+        boolean found_peak = false;
 
+        if (FILTER_METHOD == SIMPLE_FILTER)
+            found_peak = simpleFilter();
+        if (FILTER_METHOD == BORDER_FILTER)
+            found_peak = borderFilter();
+
+
+        if (found_peak) {
+            boolean isGesture = callbackInterface.classifyPeak(sensorFrame.getFrame());
+            if (isGesture)
+                sensorFrame.clear();
+        }
+
+        // Log.d("look", (accelerometerOffset + 2) + " " + ((WINDOW_SIZE / 2) * mChanelCount + accelerometerOffset + 2) + " " + ((WINDOW_SIZE - 1) * mChanelCount + accelerometerOffset + 2));
+
+        // Log.d("look", "Test: "+ z_first + " "+ z_mid + " "+ z_last);
+
+    }
+
+
+    private boolean simpleFilter(){
         // get the pos where acc_sensor starts
 
         int accelerometerOffset = 0;
@@ -190,10 +216,56 @@ public class MotionRecorder implements SensorEventListener {
                 abs(z_last) < LOW_THRESHOLD / NORMALIZE_ACCELEROMETER) {
             // Log.d("peak", "Found peak");
             // Log.d("peak", sensorFrame.toString());
-            boolean isGesture = callbackInterface.classifyPeak(sensorFrame.getFrame());
-            if(isGesture)
-                sensorFrame.clear();
+            return true;
         }
+        return false;
+    }
+
+    private boolean borderFilter(){
+        // get the pos where acc_sensor starts
+
+        int accelerometerOffset = 0;
+
+        for (int i = 0; i < mSensors.size(); i ++){
+            if (mSensors.get(i).getType() != Sensor.TYPE_ACCELEROMETER)
+                accelerometerOffset += getNumChannels(mSensors.get(i));
+            else
+                break;
+        }
+
+
+        // z value is on third pos ([2]) in acc values
+
+        int z_pos = accelerometerOffset + 2;
+
+        // we search for a peak  in z axis where the median of the first and last 10 points is under a certain threshold
+
+
+        // check for peak
+        //Log.d("look", "peak? " + sensorFrame.getFrameSlize(WINDOW_SIZE / 2)[z_pos]);
+
+        if (abs(sensorFrame.getFrameSlize(WINDOW_SIZE / 2)[z_pos]) < PEAK_THRESHOLD / NORMALIZE_ACCELEROMETER) return false;
+
+        Log.d("look", "Found peak");
+
+        // check for first points
+        float z_first = 0;
+        for (int i = 0; i < BORDER_POINTS; i++) {
+            z_first += abs(sensorFrame.getFrameSlize(i)[z_pos]);
+        }
+        z_first /= 10;
+        //Log.d("look", "z first: " + z_first);
+        if (z_first > LOW_THRESHOLD / NORMALIZE_ACCELEROMETER) return false;
+        Log.d("look", "z first: " + z_first);
+        // check for last points
+        float z_last = 0;
+        for (int i = 0; i < BORDER_POINTS; i++) {
+            z_last += abs(sensorFrame.getFrameSlize(WINDOW_SIZE - i)[z_pos]);
+        }
+        z_last /= 10;
+        Log.d("look", "z last: " + z_last);
+        if (z_last > LOW_THRESHOLD / NORMALIZE_ACCELEROMETER) return false;
+        return true;
     }
 
 
@@ -271,6 +343,15 @@ public class MotionRecorder implements SensorEventListener {
                 buffer.putFloat(get(i));
             }
             return buffer;
+        }
+
+        public float[] getFrameSlize(int at) {
+            float[] frame = new float[this.valuesPerFrame];
+            for (int i = 0; i < this.valuesPerFrame; i++) {
+                frame[i] = this.get(at * this.valuesPerFrame + i);
+            }
+
+            return frame;
         }
 
         public void clear() {
