@@ -54,6 +54,9 @@ class ApiConsumer(WebsocketConsumer):
             new_workstep = self.activeSession.recipe.work_steps.all()[self.activeSession.current_step]
             msg_body = {'event': 'step_update', 'new_step': self.activeSession.current_step, 'step_desc': new_workstep.description}
             self.send_message(msg_body)
+        elif message == "debug":
+            msg_body = {'event': 'debug', 'message': text_data_json['debug']}
+            self.send_message(msg_body)
         else:
             print("Unequal")
 
