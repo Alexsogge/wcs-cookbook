@@ -133,6 +133,10 @@ public class WebAPIManager {
     }
 
 
+    public void close(){
+        socket.close(0, "End");
+    }
+
     private final class SocketConnection extends WebSocketListener{
         private static final int NORMAL_CLOSURE_STATUS = 1000;
 
