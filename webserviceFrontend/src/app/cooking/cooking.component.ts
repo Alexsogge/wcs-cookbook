@@ -77,6 +77,7 @@ export class CookingComponent implements OnInit {
       this.currentStep.description = msgBody.step_desc;
     }
     if (msgBody.event === 'debug') {
+      console.log('Debug: ' + msgBody.message);
       this.toastr.info(msgBody.message, 'Debug');
     }
   }
