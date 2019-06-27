@@ -185,7 +185,8 @@ public class MainActivity extends WearableActivity{
     protected void onPause() {
         super.onPause();
         motionRecorder.stopRecording();
-        webAPIManager.close();
+        if (webAPIManager != null)
+            webAPIManager.close();
     }
 
     private void buildSessionList(final JSONArray sessions){
