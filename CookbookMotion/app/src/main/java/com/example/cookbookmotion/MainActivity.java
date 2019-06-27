@@ -254,14 +254,17 @@ public class MainActivity extends WearableActivity{
 
         if (gesture.equals("Left")){
             webAPIManager.prevStep();
+            webAPIManager.debugMessage("Classified left");
             motionRecorder.vibrate(new long[]{0, 200, 50, 200});
         }
         if (gesture.equals("Right")) {
             webAPIManager.nextStep();
+            webAPIManager.debugMessage("Classified right");
             motionRecorder.vibrate(new long[]{0, 200, 50, 400});
         }
 
         if (gesture.equals("Noise")){
+            webAPIManager.debugMessage("Classified Noise");
             return false;
         }
 

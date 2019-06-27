@@ -99,7 +99,6 @@ public class WebAPIManager {
         msg.put("message", "next_step");
         JSONObject msg_obj = new JSONObject(msg);
         socket.send(msg_obj.toString());
-        this.debugMessage("New Wear connected");
     }
 
     public void prevStep() {
