@@ -22,6 +22,8 @@ class ApiConsumer(WebsocketConsumer):
                 self.channel_name
             )
             self.accept()
+            msg_body = {'event': 'debug', 'message': 'New device in session.'}
+            self.send_message(msg_body)
 
 
     def disconnect(self, close_code):
