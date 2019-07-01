@@ -12,6 +12,9 @@
       <li>
         <a routerLink="/recipes">Recipes</a>
       </li>
+      <li *ngIf="userService.token">
+        <a routerLink="/newrecipe">New recipe</a>
+      </li>
     </ul>
   </div>
   <div fxFlex fxLayout fxLayoutAlign="end" fxHide.xs>

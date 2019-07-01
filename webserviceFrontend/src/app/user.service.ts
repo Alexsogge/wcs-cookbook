@@ -1,7 +1,8 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Globals} from './global';
-import {ToastrService} from "ngx-toastr";
+import {ToastrService} from 'ngx-toastr';
+import {CookieService} from 'ngx-cookie-service';
 
 @Injectable()
 export class UserService {
@@ -24,10 +25,25 @@ export class UserService {
   // error messages received from the login attempt
   public errors: any = [];
 
-  constructor(private http: HttpClient, private toastr: ToastrService) {
+  constructor(private http: HttpClient, private toastr: ToastrService, private cookieService: CookieService) {
     this.httpOptions = {
       headers: new HttpHeaders({'Content-Type': 'application/json'})
     };
+
+    if (this.cookieService.check('token')) {
+      console.log("Token:" + this.token);
+      this.token_expires = new Date(this.cookieService.get('token_expires'));
+      const now = new Date();
+      console.log(now + ' < ' + this.token_expires);
+      if (now < this.token_expires) {
+        console.log("Still valid token");
+        this.token = this.cookieService.get('token');
+        this.username = this.cookieService.get('username');
+      } else {
+        this.token_expires = null;
+        console.log("unvalid token");
+      }
+    }
   }
 
   // Uses http.post() to get an auth token from djangorestframework-jwt endpoint
@@ -54,6 +70,7 @@ export class UserService {
       }
     );
   }
+
 
   // Refreshes the JWT token, to extend the time the user is logged in
   public refreshToken() {
@@ -82,6 +99,11 @@ export class UserService {
     const token_decoded = JSON.parse(window.atob(token_parts[1]));
     this.token_expires = new Date(token_decoded.exp * 1000);
     this.username = token_decoded.username;
+
+    this.cookieService.set( 'token', this.token);
+    this.cookieService.set( 'token_expires', this.token_expires.toString());
+    this.cookieService.set( 'username', this.username);
+
     console.log("Loged in to:" + this.username);
   }
 
