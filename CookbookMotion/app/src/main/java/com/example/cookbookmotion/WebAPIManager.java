@@ -135,7 +135,7 @@ public class WebAPIManager {
 
 
     public void close(){
-        socket.close(0, "End");
+        //socket.close(0, "End");
     }
 
     public void debugMessage(String message) {
@@ -162,6 +162,7 @@ public class WebAPIManager {
         @Override
         public void onMessage(WebSocket webSocket, String text) {
             output("Receiving : " + text);
+            sockCallResp.sockResponseCallback(text);
         }
 
         @Override
