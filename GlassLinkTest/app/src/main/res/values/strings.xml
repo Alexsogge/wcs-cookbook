@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">GlassLinkTest</string>
+    <string name="title_activity_main">Glass Link</string>
+    <string name="hello_world">Hello test!</string>
+</resources>
