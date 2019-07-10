@@ -6,21 +6,41 @@ import com.google.android.glass.widget.CardScrollAdapter;
 import com.google.android.glass.widget.CardScrollView;
 
 import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
+import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * An {@link Activity} showing a tuggable "Hello World!" card.
@@ -34,160 +54,45 @@ import org.json.JSONObject;
  */
 public class MainActivity extends Activity {
 
-    /**
-     * {@link CardScrollView} to use as the main content view.
-     */
-    private CardScrollView mCardScroller;
+    private BluetoothManager bluetoothManager;
 
-    private View mView;
+    private TextView nbrTextView;
+    private TextView descTextView;
 
-
-    private WebAPIManager webAPIManager;
-
-    interface SockResponseCallbackInterface {
-        void sockResponseCallback(String text);
-        void sessionCallback(JSONArray sessions);
-        void loginCallback(boolean loggedIn);
+    interface BluetoothCallbackInterface {
+        void msgRecived(String message);
     }
 
     @Override
-    protected void onCreate(Bundle bundle) {
-        super.onCreate(bundle);
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        //      publishCards(this);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        mView = buildView("Start cookbook");
+        setContentView(R.layout.main_activity_layout);
 
-        mCardScroller = new CardScrollView(this);
-        mCardScroller.setAdapter(new CardScrollAdapter() {
+        bluetoothManager = new BluetoothManager(this, new BluetoothCallbackInterface() {
             @Override
-            public int getCount() {
-                return 1;
-            }
-
-            @Override
-            public Object getItem(int position) {
-                return mView;
-            }
-
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                return mView;
-            }
-
-            @Override
-            public int getPosition(Object item) {
-                if (mView.equals(item)) {
-                    return 0;
-                }
-                return AdapterView.INVALID_POSITION;
-            }
-        });
-
-
-        webAPIManager = new WebAPIManager("alex", "stein123", new SockResponseCallbackInterface() {
-
-            @Override
-            public void sockResponseCallback(final String text) {
-                Log.d("test", text);
-                    /* Handler handler = new Handler(Looper.getMainLooper());
-
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            int duration = Toast.LENGTH_SHORT;
-                            CharSequence chText = text;
-
-                            Toast toast = Toast.makeText(getApplicationContext(), chText, duration);
-                            toast.show();
-                        }
-                    }, 1000);*/
-
+            public void msgRecived(String message) {
                 try {
-                    JSONObject jsono = new JSONObject(text).getJSONObject("message");
-                    final String step = jsono.getString("step_desc");
-                    Log.d("session", step);
-                    Log.d("view", mView.getClass().getName());
-                    RelativeLayout relViev = (RelativeLayout)mView;
-
-                    for(int i = 0; i < relViev.getChildCount(); i++) {
-                        View child = relViev.getChildAt(i);
-                        Log.d("view", i + ": " + child.getClass().getName());
-                    }
-                    Log.d("view", "in layout");
-                    FrameLayout linearLayout = (FrameLayout) relViev.getChildAt(1);
-                    for(int i = 0; i < linearLayout.getChildCount(); i++) {
-                        View child = linearLayout.getChildAt(i);
-                        Log.d("view", child.getClass().getName());
-                    }
-                    final TextView textv = (TextView)relViev.getChildAt(2);
-                    Log.d("view", "Text:");
-                    Log.d("view", textv.getText().toString());
-                    Log.d("view", textv.toString());
-                    runOnUiThread(new Runnable() {
-
-                        @Override
-                        public void run() {
-
-                            textv.setText(step);
-                            // Stuff that updates the UI
-
-                        }
-                    });
-                    //textv.setText(step);
-                    //setContentView(buildView(step));
-                    Log.d("view", "set text");
+                    JSONObject jobj = new JSONObject(message).getJSONObject("message");
+                    nbrTextView.setText("Step: " + jobj.getInt("new_step"));
+                    descTextView.setText(jobj.getString("step_desc"));
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-
-            }
-
-            @Override
-            public void sessionCallback(JSONArray sessions) {
-                webAPIManager.connectSession(2);
-            }
-
-            @Override
-            public void loginCallback(boolean loggedIn) {
-
-            }
-
-
-        }, this);
-
-
-
-        // Handle the TAP event.
-        mCardScroller.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // Plays disallowed sound to indicate that TAP actions are not supported.
-                AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-                am.playSoundEffect(Sounds.DISALLOWED);
             }
         });
-        setContentView(mCardScroller);
+
+        nbrTextView = (TextView)findViewById(R.id.stepnbr);
+        descTextView = (TextView)findViewById(R.id.descTextView);
+
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        mCardScroller.activate();
+    public void onDestroy() {
+        bluetoothManager.close();
+        super.onDestroy();
+
     }
-
-    @Override
-    protected void onPause() {
-        mCardScroller.deactivate();
-        super.onPause();
-    }
-
-    /**
-     * Builds a Glass styled "Hello World!" view using the {@link CardBuilder} class.
-     */
-    private View buildView(String displayText) {
-        CardBuilder card = new CardBuilder(this, CardBuilder.Layout.TEXT);
-
-        card.setText(displayText);
-        return card.getView();
-    }
-
 }
