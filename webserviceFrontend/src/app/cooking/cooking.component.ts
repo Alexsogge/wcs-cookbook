@@ -27,6 +27,7 @@ export class CookingComponent implements OnInit {
 
   ngOnInit() {
     this.sessionId = +this.route.snapshot.paramMap.get('id');
+    this.currentStep = new Workstep();
     this.apiService.getActiveSessions().subscribe(sessions => this.searchForSession(sessions));
   }
 
