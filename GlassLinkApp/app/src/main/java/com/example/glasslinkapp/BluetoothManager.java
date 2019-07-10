@@ -28,6 +28,8 @@ public class BluetoothManager {
     public static final String DEVICE_NAME = "device_name";
     public static final String TOAST = "toast";
 
+    MainActivity.BluetoothCallbackInterface bluetoothCallbackInterface;
+
     // our last connection
     ConnectedThread mConnectedThread;// = new ConnectedThread(socket);
     // track our connections
@@ -56,9 +58,10 @@ public class BluetoothManager {
 
 
 
-    public BluetoothManager() {
+    public BluetoothManager(MainActivity.BluetoothCallbackInterface callbackInterface) {
         uuids[0] = UUID.fromString(uuid1);
         uuids[1] = UUID.fromString(uuid2);
+        this.bluetoothCallbackInterface = callbackInterface;
         handle = new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(Message msg) {
@@ -108,6 +111,7 @@ public class BluetoothManager {
         String devs="";
         for(BluetoothSocket sock: mSockets) {
             devs+=sock.getRemoteDevice().getName()+"\n";
+            bluetoothCallbackInterface.connectedDevice(sock.getRemoteDevice().getName());
         }
         // pass it to the UI....
         Message msg = handle.obtainMessage(STATE_CONNECTION_STARTED);

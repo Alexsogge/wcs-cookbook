@@ -42,6 +42,8 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout sessionList;
     private Button[] sessionButtons;
 
+    private TextView devices;
+
     Button sendTestButton;
 
 
@@ -52,6 +54,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+
+    interface BluetoothCallbackInterface {
+        void msgRecived(String message);
+        void connectedDevice(String device);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,7 +67,19 @@ public class MainActivity extends AppCompatActivity {
         // the activity for this is pretty stripped, just a basic selection ui....
         setContentView(R.layout.activity_main);
 
-        bluetoothManager = new BluetoothManager();
+        devices = (TextView) findViewById(R.id.connected_devices_values);
+
+        bluetoothManager = new BluetoothManager(new BluetoothCallbackInterface() {
+            @Override
+            public void msgRecived(String message) {
+
+            }
+
+            @Override
+            public void connectedDevice(String device) {
+                devices.append(device + "\n");
+            }
+        });
 
         sendTestButton = (Button)findViewById(R.id.sendtest);
         sendTestButton.setOnClickListener(new View.OnClickListener() {
