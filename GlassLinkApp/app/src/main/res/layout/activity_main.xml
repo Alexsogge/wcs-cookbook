@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center_horizontal"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/connected_devices_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Connected Devices:" />
+
+    <TextView
+        android:id="@+id/connected_devices_values"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/sendtest"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Send test" />
+
+    <LinearLayout
+        android:id="@+id/sessionlist"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"></LinearLayout>
+
+</LinearLayout>
