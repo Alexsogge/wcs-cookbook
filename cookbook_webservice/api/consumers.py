@@ -60,6 +60,7 @@ class ApiConsumer(WebsocketConsumer):
             print("Unequal")
 
     def send_session_update(self):
+        self.activeSession.refresh_from_db()
         new_workstep = self.activeSession.recipe.work_steps.all()[self.activeSession.current_step]
         msg_body = {'event': 'step_update', 'new_step': self.activeSession.current_step,
                     'step_desc': new_workstep.description}
