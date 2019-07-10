@@ -24,6 +24,7 @@ class ApiConsumer(WebsocketConsumer):
             self.accept()
             msg_body = {'event': 'debug', 'message': 'New device in session.'}
             self.send_message(msg_body)
+            self.send_session_update()
 
 
     def disconnect(self, close_code):
@@ -45,23 +46,24 @@ class ApiConsumer(WebsocketConsumer):
             if self.activeSession.current_step < self.activeSession.recipe.work_steps.count() - 1:
                 self.activeSession.current_step += 1
             self.activeSession.save()
-            new_workstep = self.activeSession.recipe.work_steps.all()[self.activeSession.current_step]
-            msg_body = {'event': 'step_update', 'new_step': self.activeSession.current_step, 'step_desc': new_workstep.description}
-            self.send_message(msg_body)
+            self.send_session_update()
         elif message == "previous_step":
             self.activeSession.refresh_from_db()
             if self.activeSession.current_step > 0:
                 self.activeSession.current_step -= 1
             self.activeSession.save()
-            new_workstep = self.activeSession.recipe.work_steps.all()[self.activeSession.current_step]
-            msg_body = {'event': 'step_update', 'new_step': self.activeSession.current_step, 'step_desc': new_workstep.description}
-            self.send_message(msg_body)
+            self.send_session_update()
         elif message == "debug":
             msg_body = {'event': 'debug', 'message': text_data_json['debug']}
             self.send_message(msg_body)
         else:
             print("Unequal")
 
+    def send_session_update(self):
+        new_workstep = self.activeSession.recipe.work_steps.all()[self.activeSession.current_step]
+        msg_body = {'event': 'step_update', 'new_step': self.activeSession.current_step,
+                    'step_desc': new_workstep.description}
+        self.send_message(msg_body)
 
     def send_message(self, message):
         # Send message to room group
