@@ -46,17 +46,13 @@ class ApiConsumer(WebsocketConsumer):
             if self.activeSession.current_step < self.activeSession.recipe.work_steps.count() - 1:
                 self.activeSession.current_step += 1
             self.activeSession.save()
-            new_workstep = self.activeSession.recipe.work_steps.all()[self.activeSession.current_step]
-            msg_body = {'event': 'step_update', 'new_step': self.activeSession.current_step, 'step_desc': new_workstep.description}
-            self.send_message(msg_body)
+            self.send_session_update()
         elif message == "previous_step":
             self.activeSession.refresh_from_db()
             if self.activeSession.current_step > 0:
                 self.activeSession.current_step -= 1
             self.activeSession.save()
-            new_workstep = self.activeSession.recipe.work_steps.all()[self.activeSession.current_step]
-            msg_body = {'event': 'step_update', 'new_step': self.activeSession.current_step, 'step_desc': new_workstep.description}
-            self.send_message(msg_body)
+            self.send_session_update()
         elif message == "debug":
             msg_body = {'event': 'debug', 'message': text_data_json['debug']}
             self.send_message(msg_body)
