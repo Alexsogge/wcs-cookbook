@@ -26,6 +26,8 @@ import { LoginComponent } from './login/login.component';
 import { ProfileComponent } from './profile/profile.component';
 import { RegisterComponent } from './register/register.component';
 import { ToastrModule } from 'ngx-toastr';
+import { NewrecipeComponent } from './newrecipe/newrecipe.component';
+import {CookieService} from 'ngx-cookie-service';
 
 
 
@@ -42,6 +44,7 @@ import { ToastrModule } from 'ngx-toastr';
     LoginComponent,
     ProfileComponent,
     RegisterComponent,
+    NewrecipeComponent,
   ],
   imports: [
     BrowserModule,
@@ -62,7 +65,7 @@ import { ToastrModule } from 'ngx-toastr';
     MatTableModule,
     ToastrModule.forRoot(), // ToastrModule added
   ],
-  providers: [UserService],
+  providers: [UserService, CookieService],
   bootstrap: [AppComponent],
   exports: [
     MatButtonModule,

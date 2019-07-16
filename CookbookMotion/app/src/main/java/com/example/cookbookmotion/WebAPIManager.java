@@ -79,6 +79,7 @@ public class WebAPIManager {
         socketConnection = new SocketConnection();
         WebSocket ws = client.newWebSocket(request, socketConnection);
         socket = ws;
+        //this.debugMessage("New Wear connected");
         //client.dispatcher().executorService().shutdown();
     }
 
@@ -133,8 +134,18 @@ public class WebAPIManager {
     }
 
 
+    public void close(){
+        //socket.close(0, "End");
+    }
+
+    public void debugMessage(String message) {
+        this.socketConnection.sendMessage("{\"message\": \"debug\", \"debug\": \"" + message + "\"}");
+    }
+
     private final class SocketConnection extends WebSocketListener{
         private static final int NORMAL_CLOSURE_STATUS = 1000;
+
+        private WebSocket socket;
 
 
         @Override
@@ -144,12 +155,14 @@ public class WebAPIManager {
             //webSocket.send(ByteString.decodeHex("deadbeef"));
             // webSocket.close(NORMAL_CLOSURE_STATUS, "Goodbye !");
             output("OPen : " + response.toString());
+            this.socket = webSocket;
         }
 
 
         @Override
         public void onMessage(WebSocket webSocket, String text) {
             output("Receiving : " + text);
+            sockCallResp.sockResponseCallback(text);
         }
 
         @Override
@@ -166,6 +179,10 @@ public class WebAPIManager {
         @Override
         public void onFailure(WebSocket webSocket, Throwable t, Response response) {
             output("Error : " + t.getMessage());
+        }
+
+        public void sendMessage(String message){
+            this.socket.send(message);
         }
     }
 

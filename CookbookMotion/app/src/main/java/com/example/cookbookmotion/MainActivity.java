@@ -126,6 +126,10 @@ public class MainActivity extends WearableActivity{
         String username = sp.getString("username", null);
         String password = sp.getString("password", null);
 
+        SharedPreferences sp_conf = getSharedPreferences("config", MODE_PRIVATE);
+        int filterMethod = sp_conf.getInt("filtermethod", 0);
+        this.motionRecorder.setFilterMethod(filterMethod);
+
         final Intent i = new Intent(this, ConfigActivity.class);
 
         if (username == null || password == null) {
@@ -181,6 +185,8 @@ public class MainActivity extends WearableActivity{
     protected void onPause() {
         super.onPause();
         motionRecorder.stopRecording();
+        if (webAPIManager != null)
+            webAPIManager.close();
     }
 
     private void buildSessionList(final JSONArray sessions){
@@ -246,28 +252,31 @@ public class MainActivity extends WearableActivity{
         TextView gestureList = (TextView)findViewById(R.id.textView2);
         gestureList.append(gesture + "\n");
 
-        if (gesture.equals("Left"))
+        if (gesture.equals("Left")){
             webAPIManager.prevStep();
-        if (gesture.equals("Right"))
+            webAPIManager.debugMessage("Classified left");
+            motionRecorder.vibrate(new long[]{0, 200, 50, 200});
+        }
+        if (gesture.equals("Right")) {
             webAPIManager.nextStep();
+            webAPIManager.debugMessage("Classified right");
+            motionRecorder.vibrate(new long[]{0, 200, 50, 400});
+        }
 
-        if (gesture.equals("Noise"))
+        if (gesture.equals("Noise")){
+            webAPIManager.debugMessage("Classified Noise");
             return false;
+        }
+
         return true;
     }
 
 
     private void adjustInset() {
-
         if (getResources().getConfiguration().isScreenRound()) {
-
             int inset = (int)(FACTOR * getResources().getConfiguration().screenWidthDp);
-
             View layout = (View) findViewById(R.id.mainview);
-
             layout.setPadding(inset, inset, inset, inset);
-
         }
-
     }
 }

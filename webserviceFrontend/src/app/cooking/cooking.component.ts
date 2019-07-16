@@ -4,6 +4,7 @@ import {ApiService} from '../api.service';
 import {ActivatedRoute} from '@angular/router';
 import {WebsocketService} from '../websocket.service';
 import {Observable, Subject, Subscription} from 'rxjs';
+import {ToastrService} from "ngx-toastr";
 
 
 @Component({
@@ -22,10 +23,11 @@ export class CookingComponent implements OnInit {
 
   ioConnection: any;
 
-  constructor(private apiService: ApiService, private route: ActivatedRoute, private websocket: WebsocketService) { }
+  constructor(private apiService: ApiService, private route: ActivatedRoute, private websocket: WebsocketService, private toastr: ToastrService) { }
 
   ngOnInit() {
     this.sessionId = +this.route.snapshot.paramMap.get('id');
+    this.currentStep = new Workstep();
     this.apiService.getActiveSessions().subscribe(sessions => this.searchForSession(sessions));
   }
 
@@ -74,6 +76,10 @@ export class CookingComponent implements OnInit {
     if (msgBody.event === 'step_update') {
       this.activeSession.currentStep = msgBody.new_step;
       this.currentStep.description = msgBody.step_desc;
+    }
+    if (msgBody.event === 'debug') {
+      console.log('Debug: ' + msgBody.message);
+      this.toastr.info(msgBody.message, 'Debug');
     }
   }
 
