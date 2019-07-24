@@ -1,7 +1,24 @@
 <h1>{{activeSession.recipeName}}</h1>
 
-<h2>Step : {{activeSession.currentStep}}</h2>
-<h3>{{currentStep.description}}</h3>
+<div fxLayout="row" fxLayoutGap="20px">
+  <div fxFlex="70">
+    <h2>Step : {{activeSession.currentStep}}</h2>
+    <h3>{{currentStep.description}}</h3>
+  </div>
+  <div fxFlex class="ingedientlist">
+    <h3>Ingredients</h3>
+    <table>
+      <tr *ngFor="let ingredient of ingredients">
+        <td>{{ingredient.amount}} {{ingredient.unit}}</td>
+        <!--
+        <td *ngIf="currentStep.description.toLowerCase().includes(ingredient.name.toLowerCase())" class="usedingredient">{{ingredient.name}}</td>
+        <td *ngIf="!currentStep.description.toLowerCase().includes(ingredient.name.toLowerCase())">{{ingredient.name}}</td>
+        -->
+        {{ingredient.name}}
+      </tr>
+    </table>
+  </div>
+</div>
 
 
 <button mat-raised-button (click)="previousStep()">Previous Step</button>

@@ -1,0 +1,8 @@
+.ingedientlist{
+  border-left: solid 1px;
+  padding-left: 5px;
+}
+
+.usedingredient{
+  color: red;
+}

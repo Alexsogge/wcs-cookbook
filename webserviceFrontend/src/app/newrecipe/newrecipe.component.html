@@ -1,3 +1,24 @@
 <h1>
   Create a new recipe
 </h1>
+
+
+
+<form [formGroup]="recipeForm" class="recipe-form">
+  <div fxLayout="column">
+    <div fxFlex>
+      <mat-form-field class="recipe-full-width">
+        <input matInput placeholder="Recipe name" formControlName="recipeName">
+      </mat-form-field>
+    </div>
+    <div fxFlex>
+      <mat-form-field class="recipe-full-width">
+        <textarea matInput placeholder="Descriprion" formControlName="description"></textarea>
+      </mat-form-field>
+    </div>
+    <h3>Ingredients</h3>
+
+    <div fxFlex *ngFor="ingredientCol of recipeForm."
+
+  </div>
+</form>

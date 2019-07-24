@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import {CookSession, Recipe, Workstep} from '../recipe';
+import {CookSession, Ingredient, Recipe, Workstep} from '../recipe';
 import {ApiService} from '../api.service';
 import {ActivatedRoute} from '@angular/router';
 import {WebsocketService} from '../websocket.service';
@@ -18,6 +18,7 @@ export class CookingComponent implements OnInit {
   private sessionId;
   private currentStep: Workstep;
   private currentRecipe: Recipe;
+  private ingredients: Ingredient[] = [];
 
   public messages: Subject<string>;
 
@@ -46,6 +47,10 @@ export class CookingComponent implements OnInit {
     this.apiService.getWorkstep(this.currentRecipe.workSteps[this.activeSession.currentStep]).subscribe(
       workstep => this.currentStep = workstep
     );
+    for (const id of this.currentRecipe.ingredients) {
+      this.apiService.getIngedient(id).subscribe(ingredient => this.ingredients.push(ingredient));
+    }
+    console.log(this.ingredients);
   }
 
   nextStep() {
