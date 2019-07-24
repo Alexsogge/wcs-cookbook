@@ -282,6 +282,8 @@ public class BluetoothManager {
 
         public ConnectedThread(BluetoothSocket socket) {
             Log.d(TAG, "create ConnectedThread");
+            bluetoothCallbackInterface.connected(socket.getRemoteDevice().getName());
+
             mmSocket = socket;
             InputStream tmpIn = null;
             OutputStream tmpOut = null;

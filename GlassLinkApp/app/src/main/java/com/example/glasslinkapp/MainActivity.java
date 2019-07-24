@@ -43,8 +43,9 @@ public class MainActivity extends AppCompatActivity {
     private Button[] sessionButtons;
 
     private TextView devices;
+    private TextView stepDescView;
 
-    Button sendTestButton;
+    private String lastApiMsg;
 
 
     interface SockResponseCallbackInterface {
@@ -58,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
     interface BluetoothCallbackInterface {
         void msgRecived(String message);
         void connectedDevice(String device);
+        void connectionLostDevice(String device);
     }
 
     @Override
@@ -76,20 +78,33 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void connectedDevice(String device) {
-                devices.append(device + "\n");
+            public void connectedDevice(final String device) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        devices.setText(device);
+                    }
+                });
+                if (lastApiMsg != null) {
+                    bluetoothManager.setMsg(lastApiMsg);
+                }
+            }
+
+            @Override
+            public void connectionLostDevice(String device) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        devices.append(" connection lost");
+                    }
+                });
             }
         });
 
-        sendTestButton = (Button)findViewById(R.id.sendtest);
-        sendTestButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                bluetoothManager.setMsg("Hello World test");
-            }
-        });
 
         sessionList = (LinearLayout) findViewById(R.id.sessionlist);
+        stepDescView = (TextView)findViewById(R.id.stepDesc);
+
         connectWebAPI();
     }
 
@@ -113,6 +128,19 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void sockResponseCallback(final String text) {
                     bluetoothManager.setMsg(text);
+                    lastApiMsg = text;
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                JSONObject jobj = new JSONObject(text).getJSONObject("message");
+                                stepDescView.setText("Step:\n"+jobj.getString("step_desc") + "\n");
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+
                 }
 
                 @Override

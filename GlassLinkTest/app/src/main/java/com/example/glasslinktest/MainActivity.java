@@ -61,6 +61,7 @@ public class MainActivity extends Activity {
 
     interface BluetoothCallbackInterface {
         void msgRecived(String message);
+        void connected(String device);
     }
 
     @Override
@@ -81,6 +82,11 @@ public class MainActivity extends Activity {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
+            }
+
+            @Override
+            public void connected(String device) {
+                descTextView.setText("Connected to " + device);
             }
         });
 

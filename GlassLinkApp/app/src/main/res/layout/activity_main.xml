@@ -17,16 +17,18 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
-    <Button
-        android:id="@+id/sendtest"
+    <TextView
+        android:id="@+id/stepDesc"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Send test" />
+        android:textSize="20sp" />
 
     <LinearLayout
         android:id="@+id/sessionlist"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"></LinearLayout>
+        android:orientation="vertical">
+
+    </LinearLayout>
 
 </LinearLayout>

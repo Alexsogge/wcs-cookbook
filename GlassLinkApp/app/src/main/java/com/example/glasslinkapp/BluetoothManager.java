@@ -6,16 +6,21 @@ import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.icu.util.Calendar;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.support.annotation.RequiresApi;
 import android.util.Log;
 import android.widget.TextView;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -70,6 +75,8 @@ public class BluetoothManager {
                         Log.d(TAG, "Connection started with" + msg.getData().getString("NAMES"));
                         break;
                     case STATE_CONNECTION_LOST:
+                        Log.d("DebugConnect", "STATE_CONNECTION_LOST");
+                        bluetoothCallbackInterface.connectionLostDevice("");
                         startListening();
                         break;
                     case READY_TO_CONN:
@@ -91,8 +98,10 @@ public class BluetoothManager {
     public void startListening() {
         if(accThread!=null) {
             accThread.cancel();
+            accThread = null;
         }else if (mConnectedThread!= null) {
             mConnectedThread.cancel();
+            mConnectedThread = null;
         } else {
             accThread = new AcceptThread();
             accThread.start();
@@ -111,7 +120,6 @@ public class BluetoothManager {
         String devs="";
         for(BluetoothSocket sock: mSockets) {
             devs+=sock.getRemoteDevice().getName()+"\n";
-            bluetoothCallbackInterface.connectedDevice(sock.getRemoteDevice().getName());
         }
         // pass it to the UI....
         Message msg = handle.obtainMessage(STATE_CONNECTION_STARTED);
@@ -149,7 +157,6 @@ public class BluetoothManager {
             BluetoothServerSocket tmp = null;
             try {
                 tmp = myBt.listenUsingInsecureRfcommWithServiceRecord(NAME, uuids[0]);
-
             } catch (IOException e) { }
             mmServerSocket = tmp;
         }
@@ -196,12 +203,15 @@ public class BluetoothManager {
         private final BluetoothSocket mmSocket;
         private final InputStream mmInStream;
         private final OutputStream mmOutStream;
+        private long lastPing;
+        volatile boolean running = true;
 
         public ConnectedThread(BluetoothSocket socket) {
             Log.d(TAG, "create ConnectedThread");
             mmSocket = socket;
             InputStream tmpIn = null;
             OutputStream tmpOut = null;
+            bluetoothCallbackInterface.connectedDevice(socket.getRemoteDevice().getName());
 
             // Get the BluetoothSocket input and output streams
             try {
@@ -214,18 +224,29 @@ public class BluetoothManager {
             mmOutStream = tmpOut;
         }
 
+        @RequiresApi(api = Build.VERSION_CODES.N)
         public void run() {
             Log.i(TAG, "BEGIN mConnectedThread");
             byte[] buffer = new byte[1024];
             int bytes;
 
             // Keep listening to the InputStream while connected
-            while (true) {
+            while (running) {
+                if(! mmSocket.isConnected()){
+                    Log.d("DebugConnect", "Connection Lost!");
+                    connectionLost();
+
+                }
                 try {
                     if(!msgToSend.equals("")) {
                         Log.e(TAG,"writing!");
                         write(msgToSend.getBytes());
                         setMsg("");
+                        lastPing = Calendar.getInstance().getTimeInMillis();
+                    } else if (lastPing + 10000 < Calendar.getInstance().getTimeInMillis()){
+                        // Log.d("DebugConnect", "Ping");
+                        write("ping".getBytes());
+                        lastPing = Calendar.getInstance().getTimeInMillis();
                     }
                     Thread.sleep(1000);
                 } catch (Exception e) {
@@ -248,6 +269,7 @@ public class BluetoothManager {
             } catch (IOException e) {
                 Log.e(TAG, "Exception during write", e);
                 connectionLost();
+                running = false;
             }
         }
 
