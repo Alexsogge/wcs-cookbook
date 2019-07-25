@@ -45,6 +45,59 @@
                 android:id="@+id/spinner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Threshold High:" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <SeekBar
+                    android:id="@+id/tsHighSlider"
+                    android:layout_width="145dp"
+                    android:layout_height="wrap_content" />
+
+                <TextView
+                    android:id="@+id/tsHighVal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="15" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/textView3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Threshold Low:" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <SeekBar
+                    android:id="@+id/tsLowSlider"
+                    android:layout_width="145dp"
+                    android:layout_height="wrap_content" />
+
+                <TextView
+                    android:id="@+id/tsLowVal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="15" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Save" />
+
         </LinearLayout>
     </ScrollView>
 </android.support.wear.widget.BoxInsetLayout>

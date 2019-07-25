@@ -42,8 +42,6 @@ public class MainActivity extends WearableActivity{
     private MotionRecorder motionRecorder;
     private WebAPIManager webAPIManager;
 
-    private Button next;
-
     private Button confBtn;
 
     private LinearLayout sessionList;
@@ -97,15 +95,6 @@ public class MainActivity extends WearableActivity{
         });
 
 
-        next = (Button) findViewById(R.id.button3);
-        next.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d("Test", "Pressed button");
-                webAPIManager.nextStep();
-            }
-        });
-
         confBtn = (Button) findViewById(R.id.confButton);
         confBtn.setOnClickListener(new View.OnClickListener(){
 
@@ -128,7 +117,11 @@ public class MainActivity extends WearableActivity{
 
         SharedPreferences sp_conf = getSharedPreferences("config", MODE_PRIVATE);
         int filterMethod = sp_conf.getInt("filtermethod", 0);
+        float tsHigh = sp_conf.getFloat("tsHigh", MotionRecorder.PEAK_THRESHOLD);
+        float tsLow = sp_conf.getFloat("tsLow", MotionRecorder.LOW_THRESHOLD);
         this.motionRecorder.setFilterMethod(filterMethod);
+        this.motionRecorder.setThresholds(tsHigh, tsLow);
+        Log.d("config", "Load " + tsLow + " | " + tsHigh);
 
         final Intent i = new Intent(this, ConfigActivity.class);
 
@@ -142,7 +135,7 @@ public class MainActivity extends WearableActivity{
 
                 @Override
                 public void sockResponseCallback(final String text) {
-                    Handler handler = new Handler(Looper.getMainLooper());
+                    /* Handler handler = new Handler(Looper.getMainLooper());
 
                     handler.postDelayed(new Runnable() {
                         @Override
@@ -153,7 +146,7 @@ public class MainActivity extends WearableActivity{
                             Toast toast = Toast.makeText(getApplicationContext(), chText, duration);
                             toast.show();
                         }
-                    }, 1000);
+                    }, 1000);*/
                 }
 
                 @Override
@@ -241,11 +234,11 @@ public class MainActivity extends WearableActivity{
 
         float max_pred = labelProbArray[0][0];
         String gesture = "Noise";
-        if (labelProbArray[0][1] > max_pred){
+        if (labelProbArray[0][1] > max_pred && labelProbArray[0][1] > 0.9){
             gesture = "Left";
             max_pred = labelProbArray[0][1];
         }
-        if (labelProbArray[0][2] > max_pred){
+        if (labelProbArray[0][2] > max_pred && labelProbArray[0][2] > 0.9){
             gesture = "Right";
         }
         Log.d("Pred", "=>: " + gesture);

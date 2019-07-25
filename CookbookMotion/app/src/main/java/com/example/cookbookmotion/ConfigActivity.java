@@ -1,6 +1,5 @@
 package com.example.cookbookmotion;
 
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.wearable.activity.WearableActivity;
@@ -10,6 +9,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -19,6 +19,13 @@ public class ConfigActivity extends WearableActivity {
     private Button login;
     private EditText userTextView;
     private EditText pwTextView;
+
+
+    private SeekBar tsHighSlider;
+    private SeekBar tsLowSlider;
+
+    private TextView tsHighVal;
+    private TextView tsLowVal;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,15 +59,15 @@ public class ConfigActivity extends WearableActivity {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 // Apply the adapter to the spinner
         spinner.setAdapter(adapter);
-        SharedPreferences sp = getSharedPreferences("config", MODE_PRIVATE);
-        int filter = sp.getInt("filtermethod", 0);
+        SharedPreferences spconf = getSharedPreferences("config", MODE_PRIVATE);
+        int filter = spconf.getInt("filtermethod", 0);
         spinner.setSelection(filter);
 
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 //Log.d("menue", "Pos: " + position);
-                SharedPreferences sp = getSharedPreferences("config",MODE_PRIVATE);
+                SharedPreferences sp = getSharedPreferences("config", MODE_PRIVATE);
                 sp.edit().putInt("filtermethod", position).apply();
             }
 
@@ -70,6 +77,58 @@ public class ConfigActivity extends WearableActivity {
             }
         });
 
+
+
+        tsHighSlider = (SeekBar)findViewById(R.id.tsHighSlider);
+        tsHighVal = (TextView)findViewById(R.id.tsHighVal);
+        tsHighVal.setText(Float.toString(spconf.getFloat("tsHigh", MotionRecorder.PEAK_THRESHOLD)));
+        tsHighSlider.setProgress((int)(spconf.getFloat("tsHigh", MotionRecorder.PEAK_THRESHOLD) * (100 / 15.0)));
+        tsHighSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                float newval = Math.round(progress * 1.5f) / 10.0f;
+                Log.d("menu", "New threshold: " + newval);
+                tsHighVal.setText(Float.toString(newval));
+                SharedPreferences sp = getSharedPreferences("config", MODE_PRIVATE);
+                sp.edit().putFloat("tsHigh", newval).apply();
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
+        tsLowSlider = (SeekBar)findViewById(R.id.tsLowSlider);
+        tsLowVal = (TextView)findViewById(R.id.tsLowVal);
+        tsLowVal.setText(Float.toString(spconf.getFloat("tsLow", MotionRecorder.LOW_THRESHOLD)));
+        //Log.d("menu", "Set slider to " + spconf.getFloat("tsLow", MotionRecorder.tsLow) + " -> "+ (int)(spconf.getFloat("tsLow", MotionRecorder.tsLow) * (100 / 15.0)));
+        tsLowSlider.setProgress((int)(spconf.getFloat("tsLow", MotionRecorder.LOW_THRESHOLD) * (100 / 15.0)));
+        tsLowSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                float newval = Math.round(progress * 1.5f) / 10.0f;
+                Log.d("menu", "New threshold: " + newval);
+                tsLowVal.setText(Float.toString(newval));
+                SharedPreferences sp = getSharedPreferences("config", MODE_PRIVATE);
+                sp.edit().putFloat("tsLow", newval).apply();
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
 
 
     }

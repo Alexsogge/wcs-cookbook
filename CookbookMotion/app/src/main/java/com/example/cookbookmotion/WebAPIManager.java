@@ -117,7 +117,7 @@ public class WebAPIManager {
                     JSONArray mainObject = new JSONArray(response);
                     ArrayList<String> listdata = new ArrayList<String>();
                     for (int i = 0; i < mainObject.length(); i++){
-                        Log.d("HTTPJ", mainObject.get(i).toString());
+                        Log.d("HTTPt", mainObject.get(i).toString());
                     }
                     sockCallResp.sessionCallback(mainObject);
 
@@ -135,7 +135,7 @@ public class WebAPIManager {
 
 
     public void close(){
-        //socket.close(0, "End");
+        // socket.close(0, "End");
     }
 
     public void debugMessage(String message) {
@@ -322,7 +322,7 @@ public class WebAPIManager {
                 Log.v("Test", e.getMessage());
             }
             Log.v("Test", "Return Token: " + token);
-            httpResponceInterface.httpResponseCallback("Authendicated");
+            httpResponceInterface.httpResponseCallback("Authenticated");
         }
 
 

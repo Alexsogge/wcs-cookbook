@@ -7,15 +7,12 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.PowerManager;
 import android.os.Vibrator;
-import android.support.v4.util.CircularArray;
 import android.util.Log;
 
-import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.Calendar;
-import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.concurrent.CountDownLatch;
@@ -27,8 +24,8 @@ public class MotionRecorder implements SensorEventListener {
 
     private static final double RATE = 50.;
     private static final int WINDOW_SIZE = 100;
-    private static final float PEAK_THRESHOLD = 9;
-    private static final float LOW_THRESHOLD = 4;
+    public static final float PEAK_THRESHOLD = 9;
+    public static final float LOW_THRESHOLD = 4;
     private static final int BORDER_POINTS = 10;
     private static final int SIMPLE_FILTER = 0;
     private static final int BORDER_FILTER = 1;
@@ -63,6 +60,8 @@ public class MotionRecorder implements SensorEventListener {
     private long lastGesture;
 
     private int filterMethod = DEFAULT_FILTER_METHOD;
+    private float tsHigh = 9;
+    private float tsLow = 4;
 
 
     public MotionRecorder(Context context, MainActivity.PeakCallbackInterface callbackInterface){
@@ -74,6 +73,11 @@ public class MotionRecorder implements SensorEventListener {
 
     public void setFilterMethod(int newMethod) {
         this.filterMethod = newMethod;
+    }
+
+    public void setThresholds(float tsHigh, float tsLow){
+        this.tsHigh = tsHigh;
+        this.tsLow = tsLow;
     }
 
     public void startRecording() {
@@ -133,7 +137,10 @@ public class MotionRecorder implements SensorEventListener {
 
         Sensor sensor = sensorEvent.sensor;
 
-        channelBuffers.get(sensor).clear();
+        if (channelBuffers.get(sensor).remaining() == 0){
+            Log.d("buffer", "Trash sensor" + sensor.getName());
+            channelBuffers.get(sensor).clear();
+        }
 
         for (float value: sensorEvent.values){
             channelBuffers.get(sensor).put(normalizeSensordata(value, sensor));
@@ -148,6 +155,9 @@ public class MotionRecorder implements SensorEventListener {
         }
         if (fullBuffers){
             flushBuffers();
+            for (FloatBuffer buffer: channelBuffers.values()){
+                buffer.clear();
+            }
         }
     }
 
@@ -239,12 +249,12 @@ public class MotionRecorder implements SensorEventListener {
 
         // Log.d("look", "Test: "+ z_first + " "+ z_mid + " "+ z_last);
 
-
-        if (abs(z_first) < LOW_THRESHOLD / NORMALIZE_ACCELEROMETER &&
-                abs(z_mid) > PEAK_THRESHOLD / NORMALIZE_ACCELEROMETER &&
-                abs(z_last) < LOW_THRESHOLD / NORMALIZE_ACCELEROMETER) {
+        Log.d("look", "Check: <" + tsLow + " | >" + tsHigh);
+        if (abs(z_first) < tsLow / NORMALIZE_ACCELEROMETER &&
+                abs(z_mid) > tsHigh / NORMALIZE_ACCELEROMETER &&
+                abs(z_last) < tsLow / NORMALIZE_ACCELEROMETER) {
             // Log.d("peak", "Found peak");
-            // Log.d("peak", sensorFrame.toString());
+            // Log.d("peak", sensorFrame.toString());tsHigh
             return true;
         }
         return false;
@@ -273,7 +283,7 @@ public class MotionRecorder implements SensorEventListener {
         // check for peak
         //Log.d("look", "peak? " + sensorFrame.getFrameSlize(WINDOW_SIZE / 2)[z_pos]);
 
-        if (abs(sensorFrame.getFrameSlize(WINDOW_SIZE / 2)[z_pos]) < PEAK_THRESHOLD / NORMALIZE_ACCELEROMETER) return false;
+        if (abs(sensorFrame.getFrameSlize(WINDOW_SIZE / 2)[z_pos]) < tsHigh / NORMALIZE_ACCELEROMETER) return false;
 
         Log.d("look", "Found peak");
 
@@ -284,7 +294,7 @@ public class MotionRecorder implements SensorEventListener {
         }
         z_first /= 10;
         //Log.d("look", "z first: " + z_first);
-        if (z_first > LOW_THRESHOLD / NORMALIZE_ACCELEROMETER) return false;
+        if (z_first > tsLow / NORMALIZE_ACCELEROMETER) return false;
         Log.d("look", "z first: " + z_first);
         // check for last points
         float z_last = 0;
@@ -293,7 +303,7 @@ public class MotionRecorder implements SensorEventListener {
         }
         z_last /= 10;
         Log.d("look", "z last: " + z_last);
-        if (z_last > LOW_THRESHOLD / NORMALIZE_ACCELEROMETER) return false;
+        if (z_last > tsLow / NORMALIZE_ACCELEROMETER) return false;
         return true;
     }
 
